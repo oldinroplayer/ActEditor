@@ -314,11 +314,9 @@ namespace ActEditor.Components {
 				grf.Commands.AddFile(path.RelativePath.ReplaceExtension(".act"), File.ReadAllBytes(temp + ".act"));
 				grf.Commands.AddFile(path.RelativePath.ReplaceExtension(".spr"), File.ReadAllBytes(temp + ".spr"));
 
-				grf.QuickSave();
+				grf.Save();
 
-				if (!grf.CancelReload) {
-					act.Commands.SaveCommandIndex();
-				}
+				grf.ProcessSaveResult();
 			}
 
 			return new SaveResult {

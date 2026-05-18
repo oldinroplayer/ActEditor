@@ -3,13 +3,16 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using ActEditor.ApplicationConfiguration;
 using ActEditor.Core.DrawingComponents;
 using ActEditor.Core.Scripting;
+using ActEditor.Core.Scripting.Scripts;
 using ActEditor.Core.WPF.FrameEditor;
 using ActEditor.Core.WPF.GenericControls;
 using ActEditor.Core.WPF.InteractionComponent;
@@ -21,8 +24,10 @@ using GRF.Image;
 using GRF.IO;
 using GrfToWpfBridge;
 using TokeiLibrary;
+using TokeiLibrary.WPF;
 using TokeiLibrary.WPF.Styles;
 using Utilities;
+using Utilities.Extension;
 
 namespace ActEditor.Core.WPF.Dialogs {
 	/// <summary>
@@ -70,6 +75,7 @@ namespace ActEditor.Core.WPF.Dialogs {
 			_initializeEditor(act, actionIndex);
 			_buildPropertyUI();
 			_initializePreview();
+			_initializePresets();
 		}
 
 		private void _initializePreview() {
@@ -565,12 +571,14 @@ namespace ActEditor.Core.WPF.Dialogs {
 		}
 
 		private CoalescingExecutor _executor = new CoalescingExecutor();
+		private string _presetPath;
 
 		private void _requestPreviewUpdate() {
 			if (_act == null) return;
 
 			_executor.Execute(delegate {
 				Act act = new Act(_act);
+				_gridProcessing.Dispatch(p => p.Visibility = Visibility.Visible);
 
 				int oldSelectedFrame = _selector.SelectedFrame;
 
@@ -578,8 +586,6 @@ namespace ActEditor.Core.WPF.Dialogs {
 					var oldFrameCount = act[_selector.SelectedAction].NumberOfFrames;
 
 					Execute(act);
-
-					//_selector.SelectedFrame = StartIndex;
 
 					if (_effectConfiguration.AutoPlay) {
 						_selector.SelectedFrame = StartIndex;
@@ -598,6 +604,8 @@ namespace ActEditor.Core.WPF.Dialogs {
 
 					if (!_effectConfiguration.AutoPlay)
 						_selector.SelectedFrame = oldSelectedFrame;
+
+					_gridProcessing.Visibility = Visibility.Collapsed;
 				});
 			});
 		}
@@ -648,6 +656,119 @@ namespace ActEditor.Core.WPF.Dialogs {
 
 		protected override void OnClosed(EventArgs e) {
 			_rfp.Dispose();
+		}
+
+		private void _initializePresets() {
+			_presetPath = GrfPath.Combine(ActEditorConfiguration.ProgramDataPath, "EffectPresets", _effectConfiguration.ParentType.Replace(" ", ""));
+
+			_buttonPreset.ContextMenu.Placement = PlacementMode.Bottom;
+			_buttonPreset.ContextMenu.PlacementTarget = _buttonPreset;
+			_buttonPreset.PreviewMouseRightButtonUp += _disableButton;
+			_buttonPreset.Click += _onButtonClick;
+		}
+
+		public void _onButtonClick(object sender, RoutedEventArgs e) {
+			_miLoad.Items.Clear();
+			_miDelete.Items.Clear();
+
+			_miLoad.IsEnabled = false;
+			_miDelete.IsEnabled = false;
+
+			List<MenuItem> itemsLoad = _loadExistingPresets();
+			List<MenuItem> itemsDelete = _loadExistingPresets();
+
+			if (itemsLoad.Count > 0) {
+				_miLoad.IsEnabled = true;
+
+				foreach (var item in itemsLoad)
+					_miLoad.Items.Add(item);
+			}
+
+			if (itemsDelete.Count > 0) {
+				_miDelete.IsEnabled = true;
+
+				foreach (var item in itemsDelete)
+					_miDelete.Items.Add(item);
+			}
+
+			_buttonPreset.ContextMenu.IsOpen = true;
+		}
+
+		private List<MenuItem> _loadExistingPresets() {
+			List<MenuItem> items = new List<MenuItem>();
+
+			if (!Directory.Exists(_presetPath))
+				Directory.CreateDirectory(_presetPath);
+
+			foreach (var file in Directory.GetFiles(_presetPath, "*.ini")) {
+				MenuItem item = new MenuItem();
+				item.Header = Path.GetFileNameWithoutExtension(file);
+				item.Click += _preset_Click;
+				items.Add(item);
+			}
+
+			return items;
+		}
+
+		private void _preset_Click(object sender, RoutedEventArgs e) {
+			var mi = (MenuItem)sender;
+			var parent = (MenuItem)mi.Parent;
+			var presetName = mi.Header + ".ini";
+
+			if (parent == _miDelete) {
+				GrfPath.Delete(GrfPath.Combine(_presetPath, presetName));
+			}
+			else if (parent == _miLoad) {
+				ConfigAsker config = new ConfigAsker(GrfPath.Combine(_presetPath, presetName));
+
+				foreach (var property in config.Keys()) {
+					ActEditorConfiguration.ConfigAsker[property] = config[property];
+				}
+
+				_gridProperties.Children.Clear();
+				_buildPropertyUI();
+				_effectConfiguration.ReloadProperties();
+				_requestPreviewUpdate();
+			}
+		}
+
+		private void _disableButton(object sender, MouseButtonEventArgs e) {
+			e.Handled = true;
+		}
+
+		private void _miSave_Click(object sender, RoutedEventArgs e) {
+			InputDialog input = new InputDialog("Choose a name for these parameters", "Saving preset", _effectConfiguration.ParentType);
+			input.Owner = this;
+
+			if (input.ShowDialog() == true) {
+				var result = input.Input;
+
+				try {
+					var path = GrfPath.Combine(_presetPath, result + ".ini");
+
+					GrfPath.CreateDirectoryFromFile(path);
+
+					StringBuilder configOutput = new StringBuilder();
+					
+					foreach (var property in _effectConfiguration.Properties.Values) {
+						if (property.Type == typeof(AnimationEditComponent)) {
+							((AnimationEditComponent)property.DefValue).SaveProperty();
+						}
+
+						if (ActEditorConfiguration.ConfigAsker.TryGetValue(property.SettingName, out string value)) {
+							configOutput.AppendLine(property.SettingName + "=" + value);
+						}
+						//else {
+						//	configOutput.AppendLine(property.SettingName + "=" + property.DefValue);
+						//}
+					}
+
+					File.WriteAllText(path, configOutput.ToString());
+				}
+				catch (Exception err) {
+					ErrorHandler.HandleException(err);
+				}
+			}
 		}
 	}
 

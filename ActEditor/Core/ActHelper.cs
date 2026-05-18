@@ -4,6 +4,7 @@ using GRF.Graphics;
 using GRF.Image;
 using System;
 using System.Collections.Generic;
+using Utilities;
 
 namespace ActEditor.Core {
 	public static class ActHelper {
@@ -81,12 +82,17 @@ namespace ActEditor.Core {
 					if (layer.SprSpriteIndex != spriteIndex)
 						return;
 
-					var previousCenter = planes[index].Center;
-					var newPlane = Layer2PlaneAdjust(act, layer, oriWidth, oriHeight, trims);
-					var diff = newPlane.Center - previousCenter;
+					try {
+						var previousCenter = planes[index].Center;
+						var newPlane = Layer2PlaneAdjust(act, layer, oriWidth, oriHeight, trims);
+						var diff = newPlane.Center - previousCenter;
 
-					layer.OffsetX += (int)Math.Round(diff.X, MidpointRounding.AwayFromZero);
-					layer.OffsetY += (int)Math.Round(diff.Y, MidpointRounding.AwayFromZero);
+						layer.OffsetX += (int)Math.Round(diff.X, MidpointRounding.AwayFromZero);
+						layer.OffsetY += (int)Math.Round(diff.Y, MidpointRounding.AwayFromZero);
+					}
+					catch {
+						Z.F();
+					}
 				});
 			}
 		}

@@ -168,8 +168,8 @@ namespace ActEditor.Core.WPF.Dialogs {
 			WpfUtilities.AddFocus(_tbIndexStart, _tbIndexEnd, _tbLayerIndexes, _tbRange, _tbEase, _tbTolerance);
 			WpfUtilities.PreviewLabel(_tbLayerIndexes, "Example: 1,2,5-9;12;");
 
-			_asIndexStart.FrameChanged += new ActIndexSelector.FrameIndexChangedDelegate(_asIndexStart_ActionChanged);
-			_asIndexEnd.FrameChanged += new ActIndexSelector.FrameIndexChangedDelegate(_asIndexEnd_ActionChanged);
+			_asIndexStart.FrameChanged += new ActIndexSelector.IndexChangedDelegate(_asIndexStart_ActionChanged);
+			_asIndexEnd.FrameChanged += new ActIndexSelector.IndexChangedDelegate(_asIndexEnd_ActionChanged);
 
 			_tbIndexEnd.TextChanged += delegate {
 				int ival;
@@ -260,12 +260,12 @@ namespace ActEditor.Core.WPF.Dialogs {
 			});
 		}
 
-		private void _asIndexEnd_ActionChanged(object sender, int actionindex) {
-			_tbIndexEnd.Text = actionindex.ToString(CultureInfo.InvariantCulture);
+		private void _asIndexEnd_ActionChanged(int actionIndex) {
+			_tbIndexEnd.Text = actionIndex.ToString(CultureInfo.InvariantCulture);
 		}
 
-		private void _asIndexStart_ActionChanged(object sender, int actionindex) {
-			_tbIndexStart.Text = actionindex.ToString(CultureInfo.InvariantCulture);
+		private void _asIndexStart_ActionChanged(int actionIndex) {
+			_tbIndexStart.Text = actionIndex.ToString(CultureInfo.InvariantCulture);
 		}
 
 		protected override void GRFEditorWindowKeyDown(object sender, KeyEventArgs e) {

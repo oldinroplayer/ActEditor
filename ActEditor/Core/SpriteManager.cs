@@ -208,8 +208,18 @@ namespace ActEditor.Core {
 			_actEditor.Act.Commands.SpriteFlip(index.GetAbsoluteIndex(_sprite), direction);
 		}
 
-		public SpriteIndex AddImage(GrfImage image, bool allowDuplicate = true) {
-			var nImage = _convertToAny(image);
+		public SpriteIndex AddImage(GrfImage image, bool allowDuplicate = true, bool quiet = false) {
+			int oldSpriteConverterOption = SpriteConverterOption;
+
+			if (quiet) {
+				SpriteConverterOption = 4;
+			}
+
+			GrfImage nImage = _convertToAny(image);
+
+			if (quiet) {
+				SpriteConverterOption = oldSpriteConverterOption;
+			}
 
 			if (allowDuplicate) {
 				_actEditor.Act.Commands.SpriteAdd(nImage);
@@ -286,11 +296,12 @@ namespace ActEditor.Core {
 						image.Palette[0] = palette[0];
 						return image;
 					}
-						image.Palette[1] = palette[1];
-						image.Palette[2] = palette[2];
-						image.Palette[3] = palette[3];
-						image.Convert(new Indexed8FormatConverter { ExistingPalette = _sprite.Palette.BytePalette, Options = Indexed8FormatConverter.PaletteOptions.UseExistingPalette });
-						//image.SetPalette(ref palette);
+
+					image.Palette[1] = palette[1];
+					image.Palette[2] = palette[2];
+					image.Palette[3] = palette[3];
+					image.Convert(new Indexed8FormatConverter { ExistingPalette = _sprite.Palette.BytePalette, Options = Indexed8FormatConverter.PaletteOptions.UseExistingPalette });
+					//image.SetPalette(ref palette);
 				}
 
 				if (SpriteConverterOption == -2)

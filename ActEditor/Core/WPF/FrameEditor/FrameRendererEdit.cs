@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using ActEditor.Core.DrawingComponents;
+using ActEditor.Core.WPF.EditorControls.ActSelectorComponents;
 using ErrorManager;
 using GRF.FileFormats.ActFormat;
 using GRF.Graphics;
@@ -229,7 +230,7 @@ namespace ActEditor.Core.WPF.FrameEditor {
 						}
 
 						if (_renderer.MainDrawingComponent != null && _editor.SelectionEngine != null) {
-							_editor.IndexSelector.OnAnimationPlaying(1);
+							_editor.IndexSelector.OnAnimationPlaying(AnimationState.StartThread);
 							List<LayerDraw> layers = _editor.SelectionEngine.SelectedLayerDraws;
 							List<Layer> layersAct = _editor.SelectionEngine.SelectedLayers.ToList();
 

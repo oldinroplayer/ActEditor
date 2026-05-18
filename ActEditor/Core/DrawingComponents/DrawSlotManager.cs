@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using Utilities;
 
 namespace ActEditor.Core.DrawingComponents {
 	public class DrawSlot {
@@ -20,6 +21,11 @@ namespace ActEditor.Core.DrawingComponents {
 
 			ActEditorConfiguration.ActEditorSpriteSelectionBorder.PropertyChanged += _onPropertyChanged;
 			ActEditorConfiguration.ActEditorSpriteSelectionBorderOverlay.PropertyChanged += _onPropertyChanged;
+			ActEditorConfiguration.ActEditorScalingMode.PropertyChanged += _actEditorScalingMode_PropertyChanged;
+		}
+
+		private void _actEditorScalingMode_PropertyChanged() {
+			ImagesDirty();
 		}
 
 		public List<DrawSlot> DrawSlots = new List<DrawSlot>();
@@ -79,7 +85,7 @@ namespace ActEditor.Core.DrawingComponents {
 					drawSlot.Image.VerticalAlignment = VerticalAlignment.Top;
 					drawSlot.Image.HorizontalAlignment = HorizontalAlignment.Left;
 					drawSlot.Image.SnapsToDevicePixels = true;
-					drawSlot.Image.SetValue(RenderOptions.BitmapScalingModeProperty, ActEditorConfiguration.ActEditorScalingMode);
+					drawSlot.Image.SetValue(RenderOptions.BitmapScalingModeProperty, ActEditorConfiguration.ActEditorScalingMode.Get());
 
 					_canvas.Children.Add(drawSlot.Image);
 					_canvas.Children.Add(drawSlot.Border);
@@ -96,7 +102,7 @@ namespace ActEditor.Core.DrawingComponents {
 		}
 
 		public void ImagesDirty() {
-			var scalingMode = ActEditorConfiguration.ActEditorScalingMode;
+			var scalingMode = ActEditorConfiguration.ActEditorScalingMode.Get();
 
 			foreach (var drawSlot in DrawSlots) {
 				drawSlot.Image.SetValue(RenderOptions.BitmapScalingModeProperty, scalingMode);
@@ -112,8 +118,6 @@ namespace ActEditor.Core.DrawingComponents {
 			foreach (var drawSlot in DrawSlots) {
 				drawSlot.Border.BorderBrush = borderBrush;
 				drawSlot.Border.Background = backgroundBrush;
-				//drawSlot.Border.Stroke = borderBrush;
-				//drawSlot.Border.Fill = backgroundBrush;
 				drawSlot.Border.SetValue(RenderOptions.EdgeModeProperty, edgeMode);
 			}
 		}
@@ -128,6 +132,7 @@ namespace ActEditor.Core.DrawingComponents {
 
 			ActEditorConfiguration.ActEditorSpriteSelectionBorder.PropertyChanged -= _onPropertyChanged;
 			ActEditorConfiguration.ActEditorSpriteSelectionBorderOverlay.PropertyChanged -= _onPropertyChanged;
+			ActEditorConfiguration.ActEditorScalingMode.PropertyChanged -= _actEditorScalingMode_PropertyChanged;
 		}
 	}
 }

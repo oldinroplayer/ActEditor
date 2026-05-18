@@ -5,6 +5,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using ActEditor.ApplicationConfiguration;
 using ActEditor.Core;
 using ActEditor.Core.WPF.EditorControls;
@@ -225,7 +226,7 @@ namespace ActEditor.Tools.PaletteSheetGenerator {
 					return;
 				}
 
-				_imagePreview.Source = image.Cast<ImageSource>();
+				_imagePreview.Source = image.Cast<BitmapSource>();
 				_imagePreview.Width = image.Width;
 				_imagePreview.Height = image.Height;
 				_showQuickPreview();

@@ -271,9 +271,12 @@ namespace ActEditor.Core.Scripting {
 						if (memberAccess != null) {
 							var typeInfo = semanticModel.GetTypeInfo(memberAccess.Expression);
 							var type = typeInfo.Type;
-							var methodName = memberAccess.Name.Identifier.Text;
-							var overloads = type.GetMembers(methodName).OfType<IMethodSymbol>().ToList();
-							methods.AddRange(overloads);
+
+							if (type != null) {
+								var methodName = memberAccess.Name.Identifier.Text;
+								var overloads = type.GetMembers(methodName).OfType<IMethodSymbol>().ToList();
+								methods.AddRange(overloads);
+							}
 						}
 					}
 

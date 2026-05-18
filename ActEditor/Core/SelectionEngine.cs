@@ -151,7 +151,7 @@ namespace ActEditor.Core {
 
 			Components = _renderer.Components;
 
-			_editor.IndexSelector.ActionChanged += (s, e) => _internalFullClearSelection();
+			_editor.IndexSelector.ActionChanged += (e) => _internalFullClearSelection();
 
 			_editor.ActLoaded += delegate {
 				if (_editor.Act == null) return;

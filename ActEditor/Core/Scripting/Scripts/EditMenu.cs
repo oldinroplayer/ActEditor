@@ -153,7 +153,7 @@ namespace ActEditor.Core.Scripting.Scripts {
 					dialog.Close();
 			};
 			byte[] paletteBefore = Methods.Copy(act.Sprite.Palette.BytePalette);
-			Pal pal = new Pal(Methods.Copy(paletteBefore));
+			Pal pal = new Pal(Methods.Copy(paletteBefore), Pal.FormatMode.NoTransparencyExceptFirstPixel);
 			dialog.SingleColorEditControl.SetPalette(pal);
 
 			bool pendingUpdate = false;
@@ -276,11 +276,11 @@ namespace ActEditor.Core.Scripting.Scripts {
 		public void Execute(Act act, int selectedActionIndex, int selectedFrameIndex, int[] selectedLayerIndexes) {
 			try {
 				EditPalette.CanOpen = false;
-				string file = TkPathRequest.OpenFile<ActEditorConfiguration>("ExtractingServiceLastPath", "filter", FileFormat.MergeFilters(Format.PaletteContainers, Format.Pal, Format.Spr));
+				string file = TkPathRequest.OpenFile<ActEditorConfiguration>("ExtractingServiceLastPath", "filter", FileFormat.MergeFilters(FileFormat.PaletteContainers, FileFormat.Pal, FileFormat.Spr));
 
 				if (file != null) {
 					if (file.IsExtension(".pal")) {
-						act.Commands.SpriteSetPalette(new Pal(File.ReadAllBytes(file)).BytePalette);
+						act.Commands.SpriteSetPalette(new Pal(File.ReadAllBytes(file), Pal.FormatMode.NoTransparencyExceptFirstPixel).BytePalette);
 						act.InvalidateVisual();
 					}
 					else if (file.IsExtension(".spr")) {
@@ -356,7 +356,7 @@ namespace ActEditor.Core.Scripting.Scripts {
 		public string Image => "background.png";
 
 		public void Execute(Act act, int selectedActionIndex, int selectedFrameIndex, int[] selectedLayerIndexes) {
-			string path = TkPathRequest.OpenFile(new Setting(null, typeof (ActEditorConfiguration).GetProperty("BackgroundPath")), "filter", FileFormat.MergeFilters(Format.Image));
+			string path = TkPathRequest.OpenFile(new Setting(null, typeof (ActEditorConfiguration).GetProperty("BackgroundPath")), "filter", FileFormat.MergeFilters(FileFormat.Image));
 
 			var tabs = ActEditorWindow.Instance._tabControl.Items.OfType<TabAct>();
 

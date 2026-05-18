@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using ActEditor.ApplicationConfiguration;
+using ActEditor.Core.WPF.EditorControls.ActSelectorComponents;
 using ErrorManager;
 using GRF.Threading;
 using TokeiLibrary;
@@ -14,12 +15,6 @@ namespace ActEditor.Core.WPF.EditorControls {
 	/// Interaction logic for FrameSelector.xaml
 	/// </summary>
 	public partial class ReadonlyPlaySelector : UserControl, IActIndexSelector {
-		#region Delegates
-
-		public delegate void FrameIndexChangedDelegate(object sender, int actionIndex);
-
-		#endregion
-
 		private bool _eventsEnabled = true;
 		private bool _frameChangedEventEnabled = true;
 		private bool _handlersEnabled = true;
@@ -62,21 +57,18 @@ namespace ActEditor.Core.WPF.EditorControls {
 
 		public int SelectedAction { get; set; }
 
-		public event ActIndexSelector.FrameIndexChangedDelegate ActionChanged;
-		public event ActIndexSelector.FrameIndexChangedDelegate FrameChanged;
-		public event ActIndexSelector.FrameIndexChangedDelegate SpecialFrameChanged;
+		public event ActIndexSelector.IndexChangedDelegate ActionChanged;
+		public event ActIndexSelector.IndexChangedDelegate FrameChanged;
+		public event ActIndexSelector.IndexChangedDelegate SpecialFrameChanged;
+		public event ActIndexSelector.AnimationStateEventHandler AnimationPlaying;
 
-		public void OnSpecialFrameChanged(int actionindex) {
+		public void OnSpecialFrameChanged(int frameIndex) {
 			if (!_handlersEnabled) return;
-			ActIndexSelector.FrameIndexChangedDelegate handler = SpecialFrameChanged;
-			if (handler != null) handler(this, actionindex);
+			SpecialFrameChanged?.Invoke(frameIndex);
 		}
 
-		public event FrameIndexChangedDelegate AnimationPlaying;
-
-		public void OnAnimationPlaying(int actionindex) {
-			FrameIndexChangedDelegate handler = AnimationPlaying;
-			if (handler != null) handler(this, actionindex);
+		public void OnAnimationPlaying(AnimationState state) {
+			AnimationPlaying?.Invoke(state);
 		}
 
 		public void SetAction(int index) {
@@ -88,20 +80,18 @@ namespace ActEditor.Core.WPF.EditorControls {
 			SelectedFrame = index;
 		}
 
-		public void OnFrameChanged(int actionindex) {
+		public void OnFrameChanged(int frameIndex) {
 			if (!_handlersEnabled) return;
 			if (!_frameChangedEventEnabled) {
-				OnSpecialFrameChanged(actionindex);
+				OnSpecialFrameChanged(frameIndex);
 				return;
 			}
-			ActIndexSelector.FrameIndexChangedDelegate handler = FrameChanged;
-			if (handler != null) handler(this, actionindex);
+			FrameChanged?.Invoke(frameIndex);
 		}
 
-		public void OnActionChanged(int actionindex) {
+		public void OnActionChanged(int actionIndex) {
 			if (!_handlersEnabled) return;
-			ActIndexSelector.FrameIndexChangedDelegate handler = ActionChanged;
-			if (handler != null) handler(this, actionindex);
+			ActionChanged?.Invoke(actionIndex);
 		}
 
 		private void _play_Click(object sender, RoutedEventArgs e) {
@@ -182,7 +172,7 @@ namespace ActEditor.Core.WPF.EditorControls {
 			int currentIntervalShown = -intervalsToHide;
 
 			try {
-				OnAnimationPlaying(2);
+				OnAnimationPlaying(AnimationState.StartThread);
 
 				while (_play.Dispatch(p => p.IsPressed)) {
 					watch.Reset();

@@ -13,3 +13,5 @@ _ReSharper
 /ColorMultiply.ps
 /changes_20250830.diff
 /shader_compile.txt
+/ActEditor/Resources/*.psd
+/rAthena

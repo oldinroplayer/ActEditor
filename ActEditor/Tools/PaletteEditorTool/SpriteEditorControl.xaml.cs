@@ -84,7 +84,7 @@ namespace ActEditor.Tools.PaletteEditorTool {
 
 			_initializeBrushTools();
 
-			_gridFocus.MouseDown += _gridFocus_MouseDown;
+			_gridFocus.PreviewMouseDown += _gridFocus_MouseDown;
 		}
 
 		private void _gridFocus_MouseDown(object sender, MouseButtonEventArgs e) {

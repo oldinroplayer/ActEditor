@@ -75,7 +75,7 @@ namespace ActEditor.Core.Scripting.Scripts.Effects {
 			Action actionB = act[bAid];
 
 			actionB.AllFrames(frame => {
-				var bb = ActImaging.Imaging.GenerateFrameBoundingBox(act, frame);
+				var bb = ActImaging.Imaging.GenerateBoundingBox(act, frame);
 
 				min.X = Math.Min(min.X, bb.Min.X);
 				min.Y = Math.Min(min.Y, bb.Min.Y);
@@ -141,7 +141,7 @@ namespace ActEditor.Core.Scripting.Scripts.Effects {
 		}
 
 		public override void ProcessAction(Act act, Action action, int animStart, int animLength) {
-			int aid = act.Actions.IndexOf(action);
+			int aid = _status.Aid;
 			animLength = animLength <= 0 ? action.Frames.Count : animLength;
 
 			for (int i = animStart; i < animStart + animLength; i++) {

@@ -27,6 +27,7 @@ namespace ActEditor.Core.WPF.FrameEditor {
 		private BitmapResourceManager _bitmapResourceManager = new BitmapResourceManager();
 		private int _drawIndex;
 		private bool _disposed;
+		private GridDraw _gridDraw;
 
 		public delegate void RenderUpdateEventHandler(object sender);
 
@@ -95,12 +96,11 @@ namespace ActEditor.Core.WPF.FrameEditor {
 			InitializeComponent();
 
 			_drawSlotManager = new DrawSlotManager(Canvas);
-
+			_gridDraw = new GridDraw(this);
 			_primary.Background = new SolidColorBrush(ActEditorConfiguration.ActEditorBackgroundColor);
 
 			SizeChanged += _renderer_SizeChanged;
 			MouseWheel += _renderer_MouseWheel;
-
 			Unloaded += _frameRenderer_Unloaded;
 		}
 
@@ -112,9 +112,9 @@ namespace ActEditor.Core.WPF.FrameEditor {
 			Editor = editor;
 			Editor.ReferencesChanged += s => Update();
 
-			Editor.IndexSelector.FrameChanged += (s, e) => Update();
-			Editor.IndexSelector.SpecialFrameChanged += (s, e) => Update();
-			Editor.IndexSelector.ActionChanged += (s, e) => Update();
+			Editor.IndexSelector.FrameChanged += (e) => Update();
+			Editor.IndexSelector.SpecialFrameChanged += (e) => Update();
+			Editor.IndexSelector.ActionChanged += (e) => Update();
 
 			Editor.ActLoaded += delegate {
 				if (Editor.Act == null) return;
@@ -127,7 +127,7 @@ namespace ActEditor.Core.WPF.FrameEditor {
 			AnchorModule = new AnchorDrawModule(this, Editor);
 			Edit = new FrameRendererEdit(this, Editor);
 
-			_components.Add(new LineDraw(this.Editor));
+			_components.Add(new LineDraw(Editor.FrameRenderer));
 		}
 
 		public void OnRenderUpdate() {
@@ -186,6 +186,10 @@ namespace ActEditor.Core.WPF.FrameEditor {
 
 			foreach (var components in _drawingModules.OrderBy(p => p.DrawingPriority)) {
 				_components.AddRange(components.GetComponents());
+			}
+
+			if (ActEditorConfiguration.ActEditorUnitGrid.Get()) {
+				_components.Add(_gridDraw);
 			}
 			
 			DrawIndex = 0;

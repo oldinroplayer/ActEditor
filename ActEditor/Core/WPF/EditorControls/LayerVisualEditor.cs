@@ -32,13 +32,13 @@ namespace ActEditor.Core.WPF.EditorControls {
 			_components = components;
 			_actEditor = actEditor;
 
-			_actEditor.IndexSelector.FrameChanged += (s, e) => {
+			_actEditor.IndexSelector.FrameChanged += (e) => {
 				if (_components.LayerEditor.DoNotRemove && !ActEditorConfiguration.ActEditorRefreshLayerEditor)
 					return;
 
 				InvalidateVisual();
 			};
-			_actEditor.IndexSelector.ActionChanged += (s, e) => InvalidateVisual();
+			_actEditor.IndexSelector.ActionChanged += (e) => InvalidateVisual();
 
 			_actEditor.ActLoaded += delegate {
 				_actEditor.Act.RenderInvalidated += (s) => InvalidateVisual();

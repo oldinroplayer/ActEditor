@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using ActEditor.Core.WPF.EditorControls;
+using ActEditor.Core.WPF.EditorControls.ActSelectorComponents;
 using ActEditor.Core.WPF.FrameEditor;
 using GRF.FileFormats.ActFormat;
 
@@ -28,11 +29,13 @@ namespace ActEditor.Core {
 
 	public interface IActIndexSelector {
 		bool IsPlaying { get; }
-		event ActIndexSelector.FrameIndexChangedDelegate ActionChanged;
-		event ActIndexSelector.FrameIndexChangedDelegate FrameChanged;
-		event ActIndexSelector.FrameIndexChangedDelegate SpecialFrameChanged;
-		void OnFrameChanged(int actionindex);
-		void OnAnimationPlaying(int actionindex);
+		event ActIndexSelector.IndexChangedDelegate ActionChanged;
+		event ActIndexSelector.IndexChangedDelegate FrameChanged;
+		event ActIndexSelector.IndexChangedDelegate SpecialFrameChanged;
+		event ActIndexSelector.AnimationStateEventHandler AnimationPlaying;
+		void OnFrameChanged(int frameIndex);
+		void OnActionChanged(int actionIndex);
+		void OnAnimationPlaying(AnimationState state);
 		int SelectedAction { get; set; }
 		int SelectedFrame { get; set; }
 		void Play();

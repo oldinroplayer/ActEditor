@@ -40,7 +40,7 @@ namespace ActEditor.Core.Scripting.Scripts {
 			if (act == null) return;
 
 			try {
-				string path = TkPathRequest.OpenFile<ActEditorConfiguration>("AppLastPath", "filter", FileFormat.MergeFilters(Format.Act));
+				string path = TkPathRequest.OpenFile<ActEditorConfiguration>("AppLastPath", "filter", FileFormat.MergeFilters(FileFormat.Act));
 
 				if (path == null) return;
 
@@ -272,7 +272,7 @@ namespace ActEditor.Core.Scripting.Scripts {
 			if (act == null) return;
 
 			try {
-				string path = TkPathRequest.OpenFile<ActEditorConfiguration>("AppLastPath", "filter", FileFormat.MergeFilters(Format.Act));
+				string path = TkPathRequest.OpenFile<ActEditorConfiguration>("AppLastPath", "filter", FileFormat.MergeFilters(FileFormat.Act));
 
 				if (path == null) return;
 

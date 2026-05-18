@@ -148,7 +148,6 @@ namespace ActEditor.ApplicationConfiguration {
 
 		private static bool? _showAnchors;
 		private static bool? _useAliasing;
-		private static BitmapScalingMode? _mode;
 
 		public static string ActEditorScriptRunnerScript {
 			get { return ConfigAsker["[ActEditor - Script Runner - Latest script]", "// Script example, for a complete list of available methods,__%LineBreak%// click on the 'Help' button__%LineBreak%foreach (var selectedLayerIndex in selectedLayerIndexes) {__%LineBreak%	var layer = act[selectedActionIndex, selectedFrameIndex, selectedLayerIndex];__%LineBreak%	layer.Translate(-10, 0);__%LineBreak%	layer.Rotate(15);__%LineBreak%}__%LineBreak%__%LineBreak%foreach (var action in act) {__%LineBreak%	foreach (var frame in action) {__%LineBreak%		foreach (var layer in frame) {__%LineBreak%			layer.OffsetX = 2 * layer.OffsetX;__%LineBreak%			layer.ScaleX *= 2f;__%LineBreak%			layer.Scale(1f, 2f);__%LineBreak%		}__%LineBreak%	}__%LineBreak%}__%LineBreak%"]; }
@@ -190,6 +189,8 @@ namespace ActEditor.ApplicationConfiguration {
 				_useAliasing = value;
 			}
 		}
+
+		public static int FrameInterval => UseAccurateFrameInterval ? 24 : 25;
 
 		public static bool UseAccurateFrameInterval {
 			get { return Boolean.Parse(ConfigAsker["[ActEditor - UseAccurateFrameInterval]", false.ToString()]); }
@@ -298,26 +299,12 @@ namespace ActEditor.ApplicationConfiguration {
 		public static QuickSetting<GrfColor> ActEditorAnchorColor = new QuickSetting<GrfColor>("[ActEditor - Anchor color]", GrfColor.ToHex(200, 255, 255, 0), v => new GrfColor(v), v => v.ToHexString());
 		public static QuickSetting<GrfColor> ActEditorGridLineHorizontal = new QuickSetting<GrfColor>("[ActEditor - Grid line horizontal color]", GrfColor.ToHex(255, 0, 0, 0), v => new GrfColor(v), v => v.ToHexString());
 		public static QuickSetting<GrfColor> ActEditorGridLineVertical = new QuickSetting<GrfColor>("[ActEditor - Grid line vertical color]", GrfColor.ToHex(255, 0, 0, 0), v => new GrfColor(v), v => v.ToHexString());
+		public static QuickSetting<BitmapScalingMode> ActEditorScalingMode = new QuickSetting<BitmapScalingMode>("[ActEditor - Scale mode]", BitmapScalingMode.NearestNeighbor.ToString(), v => (BitmapScalingMode)Enum.Parse(typeof(BitmapScalingMode), v), v => v.ToString());
+		public static QuickSetting<bool> ActEditorUnitGrid = new QuickSetting<bool>("[ActEditor - ActEditorUnitGrid]", "false", v => Boolean.Parse(v), v => v.ToString());
 
 		public static float ActEditorZoomInMultiplier {
 			get { return float.Parse(ConfigAsker["[ActEditor - Zoom in multiplier]", "1"]); }
 			set { ConfigAsker["[ActEditor - Zoom in multiplier]"] = value.ToString(CultureInfo.InvariantCulture); }
-		}
-
-		public static BitmapScalingMode ActEditorScalingMode {
-			get {
-				if (_mode != null) {
-					return _mode.Value;
-				}
-
-				var value = (BitmapScalingMode) Enum.Parse(typeof (BitmapScalingMode), ConfigAsker["[ActEditor - Scale mode]", BitmapScalingMode.NearestNeighbor.ToString()], true);
-				_mode = value;
-				return value;
-			}
-			set {
-				ConfigAsker["[ActEditor - Scale mode]"] = value.ToString();
-				_mode = value;
-			}
 		}
 
 		public static bool SaveEditorPosition {

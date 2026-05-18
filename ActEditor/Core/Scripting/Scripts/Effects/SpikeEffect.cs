@@ -69,7 +69,7 @@ namespace ActEditor.Core.Scripting.Scripts.Effects {
 
 		public override void ProcessAction(Act act, Action action, int animStart, int animLength) {
 			animLength = animLength <= 0 ? action.Frames.Count : animLength;
-			int aid = act.Actions.IndexOf(action);
+			int aid = _status.Aid;
 
 			_cutMasks = new List<bool[,]>();
 			int maxLayerCount = action.Frames.Max(p => p.Layers.Count);

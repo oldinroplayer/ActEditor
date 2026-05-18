@@ -340,7 +340,7 @@ namespace ActEditor.Core.WPF.EditorControls {
 
 		private void _miAdd_Click(object sender, RoutedEventArgs e) {
 			try {
-				string[] files = TkPathRequest.OpenFiles<ActEditorConfiguration>("ExtractingServiceLastPath", "filter", FileFormat.MergeFilters(Format.Image));
+				string[] files = TkPathRequest.OpenFiles<ActEditorConfiguration>("ExtractingServiceLastPath", "filter", FileFormat.MergeFilters(FileFormat.Image));
 				_editor.SpriteManager.InsertImages(0, files.ToList());
 			}
 			catch (OperationCanceledException) {
@@ -428,7 +428,7 @@ namespace ActEditor.Core.WPF.EditorControls {
 				case SpriteEditMode.Before:
 				case SpriteEditMode.After:
 				case SpriteEditMode.Replace:
-					string[] files = TkPathRequest.OpenFiles<ActEditorConfiguration>("ExtractingServiceLastPath", "filter", FileFormat.MergeFilters(Format.Image));
+					string[] files = TkPathRequest.OpenFiles<ActEditorConfiguration>("ExtractingServiceLastPath", "filter", FileFormat.MergeFilters(FileFormat.Image));
 
 					if (files != null && files.Length > 0) {
 						try {

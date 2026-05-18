@@ -27,6 +27,16 @@
                     </Grid.ColumnDefinitions>
                 </Grid>
             </StackPanel>
+			<Button Grid.Row="0" Grid.Column="3" HorizontalAlignment="Right" VerticalAlignment="Top" Name="_buttonPreset" Content="Presets...." Height="24" Margin="3" MinWidth="100">
+				<Button.ContextMenu>
+					<ContextMenu>
+						<MenuItem Header="Load" Name="_miLoad" />
+						<MenuItem Header="Save" Name="_miSave" Click="_miSave_Click" />
+						<Separator/>
+						<MenuItem Header="Delete" TokeiLibrary:WpfProperties.ImagePath="delete.png"  Name="_miDelete" />
+					</ContextMenu>
+				</Button.ContextMenu>
+			</Button>
 			<Grid Grid.Row="1" Margin="0 5 0 0">
 				<Grid>
                     <frameEditor:ReadonlyFrameRenderer x:Name="_rfp" MinHeight="180" Margin="2" />
@@ -44,7 +54,15 @@
                 <Button Name="_buttonApply" Click="_buttonApply_Click" Content="Apply" Height="24" Margin="3" MinWidth="100" />
                 <Button Name="_buttonCancel" Click="_buttonCancel_Click" Content="Cancel" Height="24" Margin="3" MinWidth="100" />
             </DockPanel>
-			<CheckBox x:Name="_cbAutoPlay" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="3" Content="Autoplay" />
+			<DockPanel HorizontalAlignment="Left">
+			    <CheckBox x:Name="_cbAutoPlay" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="3" Content="Autoplay" />
+				<Grid x:Name="_gridProcessing" VerticalAlignment="Center" Margin="10 0 0 0" Visibility="Collapsed">
+					<DockPanel>
+					    <Image Source="/Resources/warning16.png" Height="16" Width="16" />
+					    <TextBlock Text="Processing..." Margin="3" />
+					</DockPanel>
+				</Grid>
+			</DockPanel>
 		</Grid>
     </Grid>
 </Styles:TkWindow>

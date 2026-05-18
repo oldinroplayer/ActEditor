@@ -170,6 +170,7 @@
     </Compile>
     <Compile Include="Components\ActSaveService.cs" />
     <Compile Include="Core\ActHelper.cs" />
+    <Compile Include="Core\DrawingComponents\GridRenderer.cs" />
     <Compile Include="Core\Scripting\ActScriptLoader.cs" />
     <Compile Include="Core\ListEditCommands\ListEditGroupCommand.cs" />
     <Compile Include="Core\ListEditCommands\CommandsHolder.cs" />
@@ -189,9 +190,13 @@
       <DependentUpon>AnimationEditComponent.xaml</DependentUpon>
     </Compile>
     <Compile Include="Core\Scripting\Scripts\Effects\CrystalErosionEffect.cs" />
+    <Compile Include="Core\Scripting\Scripts\Effects\EffectHelper.cs" />
     <Compile Include="Core\Scripting\Scripts\Effects\FadeParticleEffect.cs" />
+    <Compile Include="Core\Scripting\Scripts\Effects\NoiseMaskEffect.cs" />
     <Compile Include="Core\Scripting\Scripts\Effects\RecoilEffect.cs" />
     <Compile Include="Core\Scripting\Scripts\Effects\StrokeSilhouetteEffect.cs" />
+    <Compile Include="Core\Scripting\Scripts\Effects\BubbleEffect.cs" />
+    <Compile Include="Core\Scripting\Scripts\Effects\SwirlEffect.cs" />
     <Compile Include="Core\Scripting\Scripts\Effects\TrailAttackEffect.cs" />
     <Compile Include="Core\Scripting\Scripts\Effects\SpriteOutlineEffect.cs" />
     <Compile Include="Core\Scripting\Scripts\Effects\DelayedShadowEffect.cs" />
@@ -216,7 +221,20 @@
       <DependentUpon>ScriptErrorDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Core\WPF\Dialogs\SelectableListBoxExtension.cs" />
-    <Compile Include="Core\WPF\EditorControls\ActIndexSelectorHelper.cs" />
+    <Compile Include="Core\WPF\EditorControls\ActSelectorComponents\ActAnimation.cs" />
+    <Compile Include="Core\WPF\EditorControls\ActSelectorComponents\ActionDirectionalControl.xaml.cs">
+      <DependentUpon>ActionDirectionalControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Core\WPF\EditorControls\ActSelectorComponents\ActSelectorHelper.cs" />
+    <Compile Include="Core\WPF\EditorControls\ActSelectorComponents\FrameScrollBar.xaml.cs">
+      <DependentUpon>FrameScrollBar.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Core\WPF\EditorControls\ActSelectorComponents\FrameTextBoxSelector.xaml.cs">
+      <DependentUpon>FrameTextBoxSelector.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Core\WPF\EditorControls\ActSelectorComponents\SoundSelector.xaml.cs">
+      <DependentUpon>SoundSelector.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Core\WPF\EditorControls\LayerVisualEditBox.cs" />
     <Compile Include="Core\WPF\EditorControls\QuickPreviewPaletteSheet.xaml.cs">
       <DependentUpon>QuickPreviewPaletteSheet.xaml</DependentUpon>
@@ -250,9 +268,6 @@
     <Compile Include="Core\SoundEffect.cs" />
     <Compile Include="Core\SpriteManager.cs" />
     <Compile Include="Core\TabEngine.cs" />
-    <Compile Include="Core\WPF\Dialogs\ActionInsertDialog.xaml.cs">
-      <DependentUpon>ActionInsertDialog.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Core\WPF\Dialogs\BatchScriptDialog.xaml.cs">
       <DependentUpon>BatchScriptDialog.xaml</DependentUpon>
     </Compile>
@@ -298,9 +313,6 @@
     <Compile Include="Core\WPF\Dialogs\InterpolateDialog.xaml.cs">
       <DependentUpon>InterpolateDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Core\WPF\EditorControls\ActionSelector.xaml.cs">
-      <DependentUpon>ActionSelector.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Core\WPF\EditorControls\LayerControlLoadThread.cs" />
     <Compile Include="Core\WPF\FrameEditor\ReadonlyFrameRenderer.cs" />
     <Compile Include="Core\WPF\EditorControls\ReadonlyPlaySelector.xaml.cs">
@@ -315,9 +327,6 @@
     <Compile Include="Core\WPF\GenericControls\ClickSelectTextBox.cs" />
     <Compile Include="Core\WPF\Dialogs\UsageDialog.xaml.cs">
       <DependentUpon>UsageDialog.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Core\WPF\Dialogs\FrameInsertDialog.xaml.cs">
-      <DependentUpon>FrameInsertDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Core\WPF\EditorControls\FrameSelector.xaml.cs">
       <DependentUpon>FrameSelector.xaml</DependentUpon>
@@ -442,10 +451,6 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Core\WPF\Dialogs\ActionInsertDialog.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Core\WPF\Dialogs\BatchScriptDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -478,6 +483,22 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Core\WPF\EditorControls\ActSelectorComponents\ActionDirectionalControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Core\WPF\EditorControls\ActSelectorComponents\FrameScrollBar.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Core\WPF\EditorControls\ActSelectorComponents\FrameTextBoxSelector.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Core\WPF\EditorControls\ActSelectorComponents\SoundSelector.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Core\WPF\EditorControls\CompactActIndexSelector.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -498,19 +519,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Core\WPF\EditorControls\ActionSelector.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Core\WPF\EditorControls\ReadonlyPlaySelector.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Core\WPF\Dialogs\UsageDialog.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Core\WPF\Dialogs\FrameInsertDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -951,29 +964,29 @@
     <EmbeddedResource Include="Resources\cs_dad.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\effect_floor_aura.png" />
+    <EmbeddedResource Include="Resources\Effects\effect_floor_aura.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\effect_breathing.png" />
-    <Resource Include="Resources\effect_radial_erosion.png" />
-    <Resource Include="Resources\effect_smoke_fade.png" />
-    <Resource Include="Resources\effect_spike_erosion.png" />
-    <Resource Include="Resources\effect_stroke.png" />
+    <EmbeddedResource Include="Resources\Effects\effect_breathing.png" />
+    <EmbeddedResource Include="Resources\Effects\effect_radial_erosion.png" />
+    <EmbeddedResource Include="Resources\Effects\effect_smoke_fade.png" />
+    <EmbeddedResource Include="Resources\Effects\effect_spike_erosion.png" />
+    <EmbeddedResource Include="Resources\Effects\effect_stroke.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\effect_hit.png" />
+    <EmbeddedResource Include="Resources\Effects\effect_hit.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\effect_vertical_stripe.png" />
+    <EmbeddedResource Include="Resources\Effects\effect_vertical_stripe.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\gradient.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\effect_float.png" />
+    <EmbeddedResource Include="Resources\Effects\effect_float.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\effect_shadow.png" />
+    <EmbeddedResource Include="Resources\Effects\effect_shadow.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Scripts\particle.png" />
@@ -987,7 +1000,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_BuildVersioningStyle="None.None.MonthStamp.Increment" />
+      <UserProperties BuildVersion_BuildVersioningStyle="None.None.MonthStamp.Increment" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" />
     </VisualStudio>
   </ProjectExtensions>
   <Target Name="RemoveExtraRoslynFiles" AfterTargets="Build">
@@ -1033,6 +1046,17 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\cs_selection.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Effects\effect_outline.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Effects\effect_fadeinout.png" />
+    <EmbeddedResource Include="Resources\Effects\effect_twirl.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Effects\effect_ash.png" />
+    <EmbeddedResource Include="Resources\Effects\effect_noisemask.png" />
   </ItemGroup>
   <Target Name="CopyExternalDlls" BeforeTargets="BeforeBuild">
     <MakeDir Directories="$(GrfEditorDllsPath)" Condition="!Exists('$(GrfEditorDllsPath)')" />

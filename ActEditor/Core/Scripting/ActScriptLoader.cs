@@ -68,8 +68,6 @@ namespace ActEditor.Core.Scripting {
 					shortcutTextFormat = gestureCmd[1];
 			}
 			else {
-				if (_actScript.InputGesture.Contains(":"))
-					Z.F();
 				shortcutTextFormat = _actScript.InputGesture.Split(new char[] { ':' }).FirstOrDefault();
 				commandName = (_actScript.DisplayName is string) ? _actScript.DisplayName.ToString() : shortcutTextFormat + "_cmd";
 			}

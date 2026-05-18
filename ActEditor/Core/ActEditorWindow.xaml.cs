@@ -166,12 +166,16 @@ namespace ActEditor.Core {
 			ApplicationShortcut.Link(ActEditorCommands.FrameEditorLayerMirrorVertical, () => _tabEngine.Execute(v => v.LayerEditor.MirrorFromOffset(FlipDirection.Vertical)), this);
 			ApplicationShortcut.Link(ActEditorCommands.FrameEditorLayerMirrorHorizontal, () => _tabEngine.Execute(v => v.LayerEditor.MirrorFromOffset(FlipDirection.Horizontal)), this);
 			ApplicationShortcut.Link(ActEditorCommands.ActEditorSelectActInExplorer, _miSelectAct, this);
+			ApplicationShortcut.Link(ApplicationShortcut.FromString("F7", "Debug.ViewportGrid"), delegate {
+				ActEditorConfiguration.ActEditorUnitGrid.Set(!ActEditorConfiguration.ActEditorUnitGrid.Get());
+				GetCurrentTab2().FrameRenderer.Update();
+			}, this);
 			ApplicationShortcut.Link(ApplicationShortcut.FromString("R", "Debug.TestMethod"), delegate {
 				//GC.Collect();
 				GetCurrentTab2().FrameRenderer.Update();
-				//_tabEngine.Execute(v => {
-				//	v.DummyScript();
-				//});
+				_tabEngine.Execute(v => {
+					v.DummyScript();
+				});
 			}, this);
 
 			try {
@@ -307,7 +311,8 @@ namespace ActEditor.Core {
 			_scriptLoader.AddScriptsToMenu(new BleedingOutlineEffect(), this, _mainMenu);
 			_scriptLoader.AddScriptsToMenu(new FadeInOutColorOverlayEffect(), this, _mainMenu);
 			_scriptLoader.AddScriptsToMenu(new EffectBreathing(), this, _mainMenu);
-			_scriptLoader.AddScriptsToMenu(new CutSpriteEffect(), this, _mainMenu);
+			//_scriptLoader.AddScriptsToMenu(new CutSpriteEffect(), this, _mainMenu);
+			_scriptLoader.AddScriptsToMenu(new NoiseMaskEffect(), this, _mainMenu);
 			// Attack
 			_scriptLoader.AddScriptsToMenu(new TrailAttackEffect(), this, _mainMenu);
 			_scriptLoader.AddScriptsToMenu(new SimpleAttackEffect(), this, _mainMenu);
@@ -327,6 +332,8 @@ namespace ActEditor.Core {
 			_scriptLoader.AddScriptsToMenu(new DelayedShadowEffect(), this, _mainMenu);
 			_scriptLoader.AddScriptsToMenu(new SpriteOutlineEffect(), this, _mainMenu);
 			_scriptLoader.AddScriptsToMenu(new FadeParticleEffect(), this, _mainMenu);
+			_scriptLoader.AddScriptsToMenu(new SwirlEffect(), this, _mainMenu);
+			_scriptLoader.AddScriptsToMenu(new BubbleEffect(), this, _mainMenu);
 			
 			_scriptLoader.AddScriptsToMenu(new ScriptRunnerMenu(), this, _mainMenu);
 			((MenuItem)_mainMenu.Items[7]).Items.Add(new Separator());
@@ -434,7 +441,7 @@ namespace ActEditor.Core {
 
 		private void _miOpen_Click(object sender, RoutedEventArgs e) {
 			try {
-				string file = TkPathRequest.OpenFile<ActEditorConfiguration>("ExtractingServiceLastPath", "filter", FileFormat.MergeFilters(Format.Act));
+				string file = TkPathRequest.OpenFile<ActEditorConfiguration>("ExtractingServiceLastPath", "filter", FileFormat.MergeFilters(FileFormat.Act));
 
 				if (file != null) {
 					_tabEngine.Open(file);
@@ -537,7 +544,7 @@ namespace ActEditor.Core {
 
 		private void _miOpenFromGrf_Click(object sender, RoutedEventArgs e) {
 			try {
-				string file = TkPathRequest.OpenFile<ActEditorConfiguration>("AppLastGrfPath", "filter", FileFormat.MergeFilters(Format.AllContainers, Format.Grf, Format.Gpf, Format.Thor));
+				string file = TkPathRequest.OpenFile<ActEditorConfiguration>("AppLastGrfPath", "filter", FileFormat.MergeFilters(FileFormat.AllContainers, FileFormat.Grf, FileFormat.Gpf, FileFormat.Thor));
 
 				if (file != null) {
 					GrfExplorer dialog = new GrfExplorer(file, SelectMode.Act);

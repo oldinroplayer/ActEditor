@@ -66,7 +66,7 @@ namespace ActEditor.Core.WPF.Dialogs {
 				_extra.Add(ActEditorConfiguration.ActEditorGifGuidelinesColor.ToGrfColor().ToHexString().Replace("0x", "#"));
 
 				_extra.Add("scaling");
-				_extra.Add(ActEditorConfiguration.ActEditorScalingMode.ToString());
+				_extra.Add(ActEditorConfiguration.ActEditorScalingMode.Get().ToString());
 
 				_extra.Add("delay");
 				_extra.Add(_tbDelay.Text);

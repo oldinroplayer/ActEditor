@@ -116,7 +116,7 @@ namespace ActEditor.Tools.PaletteEditorTool {
 				return result;
 			}
 			else if (filePath.IsExtension(".pal")) {
-				result.LoadedPal = new Pal(data);
+				result.LoadedPal = new Pal(data, Pal.FormatMode.NoTransparencyExceptFirstPixel);
 				result.LoadedPal.BytePalette[3] = 0;
 				result.UpdatePalette = true;
 				result.Success = true;
@@ -167,10 +167,7 @@ namespace ActEditor.Tools.PaletteEditorTool {
 				// Fix: 2026-03-01
 				// There's no reason to make the first color unique... It creates issues when comparing palettes as well later.
 				//spr.Palette.MakeFirstColorUnique();
-				spr.Palette[3] = 255;
-
 				spr.Save(file);
-				spr.Palette[3] = 0;
 			}
 			finally {
 				spr.Palette.EnableRaiseEvents = true;
@@ -182,7 +179,6 @@ namespace ActEditor.Tools.PaletteEditorTool {
 				pal.EnableRaiseEvents = false;
 				pal.MakeFirstColorUnique();
 				pal[3] = 255;
-
 				pal.Save(file.ReplaceExtension(".pal"));
 				pal[3] = 0;
 			}

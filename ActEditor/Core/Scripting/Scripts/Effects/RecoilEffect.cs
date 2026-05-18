@@ -72,69 +72,6 @@ namespace ActEditor.Core.Scripting.Scripts.Effects {
 			layer.Rotation += (int)angle;
 		}
 
-		//public override void ProcessAction(Act act, Action action, int animStart, int animLength) {
-		//	int aid = act.Actions.IndexOf(action);
-		//	int baseAction = aid % 8;
-		//
-		//	TkVector3[] animation;
-		//
-		//	TkVector3[] animationBottom = new TkVector3[] {
-		//		new TkVector3(5, 0, 7),
-		//		new TkVector3(8, 0, 10),
-		//		new TkVector3(10, 1, 12),
-		//		new TkVector3(12, 2, 14),
-		//	};
-		//
-		//	TkVector3[] animationTop = new TkVector3[] {
-		//		new TkVector3(4, 2, 7),
-		//		new TkVector3(6, 3, 10),
-		//		new TkVector3(7, 4, 12),
-		//		new TkVector3(9, 5, 14),
-		//	};
-		//
-		//	for (int i = animStart; i < animStart + animLength; i++) {
-		//		Frame frame = action[i];
-		//		int step = i - animStart;
-		//		float mult = (float)step / (animLength - 1);
-		//
-		//		for (int layerIndex = 0; layerIndex < frame.Layers.Count; layerIndex++) {
-		//			if (!IsLayerForProcess(layerIndex))
-		//				continue;
-		//
-		//			var layer = frame[layerIndex];
-		//
-		//			if (TargetColor != null)
-		//				ProcessColor(layer, mult, TargetColor);
-		//
-		//			if (baseAction <= 1 || baseAction >= 6)
-		//				animation = animationBottom;
-		//			else
-		//				animation = animationTop;
-		//
-		//			int bAction = Methods.Clamp((int)(mult * animation.Length), 0, animation.Length - 1);
-		//			int bActionNext = Methods.Clamp(bAction + 1, 0, animation.Length - 1);
-		//
-		//			var diff = mult - bAction / (float)animation.Length;
-		//
-		//			TkVector3 actionVector = (animation[bActionNext] - animation[bAction]) * diff + animation[bAction];
-		//
-		//			if (baseAction <= 1) {
-		//
-		//			}
-		//			else if (baseAction <= 3)
-		//				actionVector = new TkVector3(actionVector.X, actionVector.Y, actionVector.Z);
-		//			else if (baseAction <= 5)
-		//				actionVector = new TkVector3(-actionVector.X, actionVector.Y, -actionVector.Z);
-		//			else
-		//				actionVector = new TkVector3(-actionVector.X, actionVector.Y, -actionVector.Z);
-		//
-		//			layer.OffsetX += (int)(actionVector.X * _options.Scale.X);
-		//			layer.OffsetY += (int)(actionVector.Y * _options.Scale.Y);
-		//			layer.Rotation += (int)(actionVector.Z);
-		//		}
-		//	}
-		//}
-
 		public override string InputGesture => "{Dialog.AnimationRecoil}";
 		public override string Image => "empty.png";
 		public override string Group => "Effects/Hit";

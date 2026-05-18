@@ -37,7 +37,7 @@ namespace ActEditor.Tools.PaletteEditorTool {
 					File.WriteAllBytes(path, paletteData);
 				}
 
-				var pal = new Pal(path);
+				var pal = new Pal(path, Pal.FormatMode.NoTransparency);
 				pal.PaletteChanged += delegate {
 					File.WriteAllBytes(path, pal.BytePalette);
 					

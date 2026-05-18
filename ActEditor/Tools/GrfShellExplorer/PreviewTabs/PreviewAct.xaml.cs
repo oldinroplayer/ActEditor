@@ -40,51 +40,23 @@ namespace ActEditor.Tools.GrfShellExplorer.PreviewTabs {
 		public PreviewAct() {
 			InitializeComponent();
 
-			_imagePreview.Dispatch(p => p.SetValue(RenderOptions.BitmapScalingModeProperty, Configuration.BestAvailableScaleMode));
+			_imagePreview.Dispatch(p => p.SetValue(RenderOptions.BitmapScalingModeProperty, BitmapScalingMode.NearestNeighbor));
 			_imagePreview.Dispatch(p => p.SetValue(RenderOptions.EdgeModeProperty, EdgeMode.Aliased));
 
 			try {
-				_fancyButtons = new FancyButton[] {_fancyButton0, _fancyButton1, _fancyButton2, _fancyButton3, _fancyButton4, _fancyButton5, _fancyButton6, _fancyButton7}.ToList();
+				_fancyButtons = new FancyButton[] { _fancyButton0, _fancyButton1, _fancyButton2, _fancyButton3, _fancyButton4, _fancyButton5, _fancyButton6, _fancyButton7 }.ToList();
 
 				BitmapSource image = ApplicationManager.PreloadResourceImage("arrow.png");
 				BitmapSource image2 = ApplicationManager.PreloadResourceImage("arrowoblique.png");
 
-				_fancyButtons.ForEach(p => {
-					p.ImageIcon.Stretch = Stretch.None;
-					p.ImageIcon.SetValue(RenderOptions.BitmapScalingModeProperty, BitmapScalingMode.HighQuality);
-				});
-
-				_fancyButton0.ImageIcon.Source = image;
-				_fancyButton0.ImageIcon.RenderTransformOrigin = new Point(0.5, 0.5);
-				_fancyButton0.ImageIcon.RenderTransform = new RotateTransform {Angle = 90};
-
-				_fancyButton1.ImageIcon.Source = image2;
-				_fancyButton1.ImageIcon.RenderTransformOrigin = new Point(0.5, 0.5);
-				_fancyButton1.ImageIcon.RenderTransform = new RotateTransform {Angle = 90};
-
-				_fancyButton2.ImageIcon.Source = image;
-				_fancyButton2.ImageIcon.RenderTransformOrigin = new Point(0.5, 0.5);
-				_fancyButton2.ImageIcon.RenderTransform = new RotateTransform {Angle = 180};
-
-				_fancyButton3.ImageIcon.Source = image2;
-				_fancyButton3.ImageIcon.RenderTransformOrigin = new Point(0.5, 0.5);
-				_fancyButton3.ImageIcon.RenderTransform = new RotateTransform {Angle = 180};
-
-				_fancyButton4.ImageIcon.Source = image;
-				_fancyButton4.ImageIcon.RenderTransformOrigin = new Point(0.5, 0.5);
-				_fancyButton4.ImageIcon.RenderTransform = new RotateTransform {Angle = 270};
-
-				_fancyButton5.ImageIcon.Source = image2;
-				_fancyButton5.ImageIcon.RenderTransformOrigin = new Point(0.5, 0.5);
-				_fancyButton5.ImageIcon.RenderTransform = new RotateTransform {Angle = 270};
-
-				_fancyButton6.ImageIcon.Source = image;
-				_fancyButton6.ImageIcon.RenderTransformOrigin = new Point(0.5, 0.5);
-				_fancyButton6.ImageIcon.RenderTransform = new RotateTransform {Angle = 360};
-
-				_fancyButton7.ImageIcon.Source = image2;
-				_fancyButton7.ImageIcon.RenderTransformOrigin = new Point(0.5, 0.5);
-				_fancyButton7.ImageIcon.RenderTransform = new RotateTransform {Angle = 360};
+				for (int index = 0; index < _fancyButtons.Count; ++index) {
+					_fancyButtons[index].ImageIcon.Source = index % 2 == 0 ? image : image2;
+					_fancyButtons[index].ImageIcon.Height = 16;
+					_fancyButtons[index].ImageIcon.Width = 16;
+					_fancyButtons[index].ImageIcon.SetValue(RenderOptions.BitmapScalingModeProperty, BitmapScalingMode.HighQuality);
+					_fancyButtons[index].ImageIcon.RenderTransformOrigin = new Point(0.5, 0.5);
+					_fancyButtons[index].ImageIcon.RenderTransform = new RotateTransform { Angle = index / 2 * 90 + 90 };
+				}
 
 				IsVisibleChanged += (e, a) => _enableActThread = IsVisible;
 
@@ -117,7 +89,7 @@ namespace ActEditor.Tools.GrfShellExplorer.PreviewTabs {
 		public ScrollViewer ScrollViewer {
 			get { return _scrollViewer; }
 		}
-
+		
 		private void _actAnimationThread() {
 			while (true) {
 				if (!_isRunning)

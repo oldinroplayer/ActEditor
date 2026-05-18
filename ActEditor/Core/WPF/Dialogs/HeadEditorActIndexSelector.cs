@@ -1,4 +1,5 @@
 ﻿using ActEditor.Core.WPF.EditorControls;
+using ActEditor.Core.WPF.EditorControls.ActSelectorComponents;
 
 namespace ActEditor.Core.WPF.Dialogs {
 	public class HeadEditorActIndexSelector : IActIndexSelector {
@@ -8,28 +9,27 @@ namespace ActEditor.Core.WPF.Dialogs {
 			_editor = editor;
 		}
 
-		public void OnFrameChanged(int actionindex) {
-			ActIndexSelector.FrameIndexChangedDelegate handler = FrameChanged;
-			if (handler != null) handler(this, actionindex);
+		public void OnFrameChanged(int actionIndex) {
+			FrameChanged?.Invoke(actionIndex);
 		}
 
 		public bool IsPlaying { get { return false; } }
-		public event ActIndexSelector.FrameIndexChangedDelegate ActionChanged;
+		public event ActIndexSelector.IndexChangedDelegate ActionChanged;
 
-		public void OnActionChanged(int actionindex) {
-			ActIndexSelector.FrameIndexChangedDelegate handler = ActionChanged;
-			if (handler != null) handler(this, actionindex);
+		public void OnActionChanged(int actionIndex) {
+			ActionChanged?.Invoke(actionIndex);
 		}
 
-		public event ActIndexSelector.FrameIndexChangedDelegate FrameChanged;
-		public event ActIndexSelector.FrameIndexChangedDelegate SpecialFrameChanged;
+		public event ActIndexSelector.IndexChangedDelegate FrameChanged;
+		public event ActIndexSelector.IndexChangedDelegate SpecialFrameChanged;
+		public event ActIndexSelector.AnimationStateEventHandler AnimationPlaying;
 
-		public void OnSpecialFrameChanged(int actionindex) {
-			ActIndexSelector.FrameIndexChangedDelegate handler = SpecialFrameChanged;
-			if (handler != null) handler(this, actionindex);
+		public void OnSpecialFrameChanged(int frameIndex) {
+			SpecialFrameChanged?.Invoke(frameIndex);
 		}
 
-		public void OnAnimationPlaying(int actionindex) {
+		public void OnAnimationPlaying(AnimationState state) {
+			AnimationPlaying?.Invoke(state);
 		}
 
 		public void SetAction(int index) {

@@ -57,11 +57,10 @@ namespace ActEditor.Core.WPF.EditorControls {
 			set { SetValue(AllowLastIndexProperty, value); }
 		}
 
-		public event ActIndexSelector.FrameIndexChangedDelegate FrameChanged;
+		public event ActIndexSelector.IndexChangedDelegate FrameChanged;
 
-		public void OnFrameChanged(int actionindex) {
-			ActIndexSelector.FrameIndexChangedDelegate handler = FrameChanged;
-			if (handler != null) handler(this, actionindex);
+		public void OnFrameChanged(int frameIndex) {
+			FrameChanged?.Invoke(frameIndex);
 		}
 
 		private void _sbFrameIndex_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {

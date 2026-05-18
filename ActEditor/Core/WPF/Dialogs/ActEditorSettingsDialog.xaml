@@ -49,8 +49,15 @@
                                             will from the recent files menu will be opened.
                                         </TextBlock>
                                     </Label.ToolTip>
-                                </Label>
-                                <Label Grid.Row="7" Content="Show horizontal grid line" ToolTipService.ShowDuration="1000000">
+								</Label>
+								<!-- <Label Grid.Row="6" Content="Use sticky selection behavior" ToolTipService.ShowDuration="1000000">
+									<Label.ToolTip>
+										<TextBlock>
+                                            If unchekced, the layer selection will feel similar closer to Windows' selection behavior. You will need to hold Shift/Control for multi-selection.
+										</TextBlock>
+									</Label.ToolTip>
+								</Label> -->
+								<Label Grid.Row="7" Content="Show horizontal grid line" ToolTipService.ShowDuration="1000000">
                                     <Label.ToolTip>
                                         <TextBlock>
                                             Show or hide the horizontal grid line in the Frame Editor control.

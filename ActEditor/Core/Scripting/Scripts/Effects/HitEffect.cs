@@ -41,7 +41,7 @@ namespace ActEditor.Core.Scripting.Scripts.Effects {
 
 		public override void ProcessAction(Act act, Action action, int animStart, int animLength) {
 			animLength = 5;
-			int aid = act.Actions.IndexOf(action);
+			int aid = _status.Aid;
 			int baseAction = aid % 8;
 			float[] scales = { 1f, 1.15f, 1.09f, 1.03f, 1f };
 

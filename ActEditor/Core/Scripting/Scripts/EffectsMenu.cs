@@ -60,6 +60,7 @@ namespace ActEditor.Core.Scripting.Scripts {
 		#endregion
 	}
 
+
 	public class CutSpriteEffect : ImageProcessingEffect {
 		#region IActScript Members
 
@@ -476,7 +477,7 @@ namespace ActEditor.Core.Scripting.Scripts {
 
 		public override string Group => "Effects/Idle";
 		public override string InputGesture => "{Dialog.AnimationAsh}";
-		public override string Image => "empty.png";
+		public override string Image => "effect_ash.png";
 
 		#endregion
 	}
@@ -604,7 +605,7 @@ namespace ActEditor.Core.Scripting.Scripts {
 
 		public override string Group => "Effects/Idle";
 		public override string InputGesture => "{Dialog.AnimationFadeInOutColorOverlay}";
-		public override string Image => "empty.png";
+		public override string Image => "effect_fadeinout.png";
 
 		#endregion
 	}
@@ -796,6 +797,10 @@ namespace ActEditor.Core.Scripting.Scripts {
 			return true;
 		}
 
+		public virtual void PreviewProcessLayer(Act act, Layer layer, int step, int animLength) {
+
+		}
+
 		public virtual void ProcessLayer(Act act, Layer layer, int step, int animLength) {
 			var sprIndex = layer.SprSpriteIndex;
 
@@ -880,6 +885,7 @@ namespace ActEditor.Core.Scripting.Scripts {
 					ProcessColor(layer, mult, TargetColor.Value);
 
 				_status.ActIndex = new ActIndex() { ActionIndex = _status.Aid, FrameIndex = _status.Fid, LayerIndex = _status.Lid };
+				PreviewProcessLayer(_status.ModifiedAct, layer, step, animLength);
 				ProcessLayer(_status.ModifiedAct, layer, step, animLength);
 			}
 		}

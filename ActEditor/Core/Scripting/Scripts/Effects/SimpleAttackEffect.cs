@@ -33,7 +33,7 @@ namespace ActEditor.Core.Scripting.Scripts.Effects {
 		}
 
 		public override void ProcessAction(Act act, Action action, int animStart, int animLength) {
-			int aid = act.Actions.IndexOf(action);
+			int aid = _status.Aid;
 			int baseAction = aid % 8;
 
 			TkVector2[] animation;

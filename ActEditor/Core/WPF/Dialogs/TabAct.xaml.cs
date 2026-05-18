@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -14,6 +15,7 @@ using ActEditor.Core.WPF.FrameEditor;
 using ErrorManager;
 using GRF.FileFormats.ActFormat;
 using GRF.FileFormats.SprFormat;
+using GRF.Graphics;
 using GRF.Image;
 using GrfToWpfBridge;
 using TokeiLibrary;
@@ -502,7 +504,7 @@ namespace ActEditor.Core.WPF.Dialogs {
 
 		internal void DummyScript() {
 			var script = new DummyScript();
-			script.Execute(Act, 0, 0, new int[0]);
+			script.Execute(Act, SelectedAction, SelectedFrame, new int[0]);
 		}
 
 		public void Dispose() {
@@ -540,8 +542,87 @@ namespace ActEditor.Core.WPF.Dialogs {
 			get { return "addgrf.png"; }
 		}
 
+		private static GrfImage _guide;
+
+		static DummyScript() {
+			byte[] palette = new byte[1024];
+			var pixels = new byte[3*6] {
+				0, 0, 0, 0, 0, 0,
+				0, 1, 2, 3, 4, 0,
+				0, 0, 0, 0, 0, 0
+			};
+
+			GrfImage imageGuide = new GrfImage(pixels, 6, 3, GrfImageType.Indexed8, palette);
+			imageGuide.SetPaletteColor(1, new GrfColor(255, 67, 59, 249));
+			imageGuide.SetPaletteColor(2, new GrfColor(255, 33, 114, 46));
+			imageGuide.SetPaletteColor(3, new GrfColor(255, 229, 88, 97));
+			imageGuide.SetPaletteColor(4, new GrfColor(255, 12, 213, 109));
+
+			_guide = imageGuide;
+		}
+
 		public void Execute(Act act, int selectedActionIndex, int selectedFrameIndex, int[] selectedLayerIndexes) {
 			if (act == null) return;
+
+			Window window = new Window();
+			var editor = new ICSharpCode.AvalonEdit.TextEditor();
+			window.Content = editor;
+
+			StringBuilder b = new StringBuilder();
+
+			for (int aid = 0; aid < act.Actions.Count; aid++) {
+				var action = act.Actions[aid];
+
+				b.AppendLine($"Actions[{aid}] = {{");
+				
+				for (int fid = 0; fid < action.Frames.Count; fid++) {
+					var frame = action[fid];
+
+					b.AppendLine($"\tFrames[{fid}] = {{");
+
+					if (frame.Anchors.Count == 0) {
+						b.AppendLine("\t\tAnchors = {},");
+					}
+					else {
+						for (int anid = 0; anid < frame.Anchors.Count; anid++) {
+							b.AppendLine($"\t\tAnchors[{anid} = {{");
+							b.AppendLine($"\t\t\tOffsetX = {frame.Anchors[anid].OffsetX},");
+							b.AppendLine($"\t\t\tOffsetY = {frame.Anchors[anid].OffsetY}");
+							b.AppendLine("\t\t},");
+						}
+					}
+
+					if (frame.Layers.Count == 0) {
+						b.AppendLine("\t\tLayers = {},");
+					}
+					else {
+						for (int lid = 0; lid < frame.Layers.Count; lid++) {
+							var layer = frame[lid];
+
+							b.AppendLine($"\t\tLayers[{lid} = {{");
+							b.AppendLine($"\t\t\tOffsetX = {layer.OffsetX},");
+							b.AppendLine($"\t\t\tOffsetY = {layer.OffsetY},");
+							b.AppendLine($"\t\t\tSpriteIndex = {layer.SpriteIndex},");
+							b.AppendLine($"\t\t\tMirror = {layer.Mirror},");
+							b.AppendLine($"\t\t\tScaleX = {layer.ScaleX},");
+							b.AppendLine($"\t\t\tScaleY = {layer.ScaleY},");
+							b.AppendLine($"\t\t\tRotation = {layer.Rotation},");
+							b.AppendLine($"\t\t\tWidth = {layer.Width},");
+							b.AppendLine($"\t\t\tHeight = {layer.Height},");
+							b.AppendLine("\t\t},");
+						}
+					}
+
+					b.AppendLine("\t},");
+				}
+
+				b.AppendLine("},");
+			}
+
+			editor.Text = b.ToString();
+			window.Width = 300;
+			window.Height = 500;
+			window.ShowDialog();
 
 			try {
 				act.Commands.ActEditBegin("Merge layers into new sprite");
@@ -549,22 +630,19 @@ namespace ActEditor.Core.WPF.Dialogs {
 				int index = 0;
 
 				try {
-					int aid = 0;
 					foreach (var action in act) {
-						Z.F();
+						int actionIndex = selectedActionIndex;
 
 						foreach (var frame in action) {
-							//if (frame.Layers.Count <= 1) {
-							//	index++;
-							//	continue;
-							//}
+							if (frame.Layers.Count <= 1) {
+								index++;
+								continue;
+							}
 
-							//if (aid != 4) {
-							//	continue;
-							//}
-
+							var box = ActImaging.Imaging.GenerateBoundingBox(act, frame, ceilingAwayFromZero: false);
+							var imageGuide = frame.Render(act, _guide);
 							var image = frame.Render(act);
-							var box = ActImaging.Imaging.GenerateFrameBoundingBox(act, frame);
+
 							SpriteIndex sprIndex = SpriteIndex.Null;
 
 							for (int i = 0; i < act.Sprite.Images.Count; i++) {
@@ -577,59 +655,60 @@ namespace ActEditor.Core.WPF.Dialogs {
 								sprIndex = act.Sprite.InsertAny(image);
 							}
 
-							int offsetX = (int)((int)((box.Max.X - box.Min.X + 1) / 2) + box.Min.X);
-							int offsetY = (int)((int)((box.Max.Y - box.Min.Y + 1) / 2) + box.Min.Y);
+							int offsetX = (int)Math.Round(box.Center.X + 0.5f);
+							int offsetY = (int)Math.Round(box.Center.Y + 0.5f);
+
+							// Find marker offsets
+							int markerCenterX = (int)box.Center.X + (image.Width % 2);
+							int markerCenterY = (int)box.Center.Y + (image.Height % 2);
+
+							for (int y = -1; y <= 1; y++) {
+								for (int x = -3; x <= -1; x++) {
+									int markerX = imageGuide.Width / 2 + x;
+									int markerY = imageGuide.Height / 2 + y;
+
+									bool found = true;
+
+									for (int k = 0; k < 4; k++) {
+										if (imageGuide.GetColor(markerX + k, markerY) != _guide.GetColor(7 + k)) {
+											found = false;
+											break;
+										}
+									}
+
+									if (found) {
+										int computedMarkerX = markerX - imageGuide.Width / 2;
+										int computedMarkerY = markerY - imageGuide.Height / 2;
+
+										// Marker center diff:
+										computedMarkerX += offsetX - markerCenterX;
+										computedMarkerY += offsetY - markerCenterY;
+
+										if (computedMarkerX < -2)
+											offsetX++;
+										if (computedMarkerX > -2)
+											offsetX--;
+										if (computedMarkerY < -1)
+											offsetY++;
+										if (computedMarkerY > -1)
+											offsetY--;
+										break;
+									}
+								}
+							}
+
 							var layer = new Layer(sprIndex);
-							act.Commands.SetColor(selectedActionIndex, selectedFrameIndex, act[selectedActionIndex, selectedFrameIndex].Layers.Count - 1, new GrfColor("#FFFFFFFF"));
 							layer.OffsetX = offsetX;
 							layer.OffsetY = offsetY;
 
 							frame.Layers.Clear();
 							frame.Layers.Add(layer);
-
-							var newBox = ActImaging.Imaging.GenerateFrameBoundingBox(act, frame);
-
-							if ((newBox.Min.X - box.Min.X) > 0.7) {
-								layer.OffsetX--;
-							}
-							else if ((newBox.Min.X - box.Min.X) < -0.7) {
-								layer.OffsetX++;
-							}
-
-							if ((newBox.Min.Y - box.Min.Y) > 0.7) {
-								layer.OffsetY--;
-							}
-							else if ((newBox.Min.Y - box.Min.Y) < -0.7) {
-								layer.OffsetY++;
-							}
-
 							index++;
 						}
-
-						aid++;
 					}
 
-					// Removes unused sprites - old way, older versions have a bug
-					for (int i = act.Sprite.Images.Count - 1; i >= 0; i--) {
-						if (act.FindUsageOf(i).Count == 0) {
-							var type = act.Sprite.Images[i].GrfImageType;
-							var relativeIndex = act.Sprite.AbsoluteToRelative(i, type == GrfImageType.Indexed8 ? 0 : 1);
-							act.Sprite.Remove(relativeIndex, type);
-
-							if (type == GrfImageType.Indexed8) {
-								act.AllLayers(layer => {
-									if ((layer.IsIndexed8() && type == GrfImageType.Indexed8) ||
-										(layer.IsBgra32() && type == GrfImageType.Bgra32)) {
-										if (layer.SpriteIndex == relativeIndex) {
-											layer.SpriteIndex = -1;
-										}
-									}
-								});
-							}
-
-							act.Sprite.ShiftIndexesAbove(act, type, -1, relativeIndex);
-						}
-					}
+					act.Sprite.RemoveUnusedImages(act);
+					ActHelper.TrimImages(act, tolerance: 0, keepPerfectAlignment: true);
 				}
 				finally {
 					index = count;

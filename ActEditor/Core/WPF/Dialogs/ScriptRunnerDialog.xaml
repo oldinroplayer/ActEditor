@@ -5,6 +5,7 @@
         xmlns:ListView="clr-namespace:TokeiLibrary.WPF.Styles.ListView;assembly=TokeiLibrary"
         xmlns:TokeiLibrary="clr-namespace:TokeiLibrary;assembly=TokeiLibrary"
         xmlns:avalonedit="http://icsharpcode.net/sharpdevelop/avalonedit"
+		ShowInTaskbar ="True" WindowStartupLocation="CenterOwner"
         Background="{StaticResource TabItemBackground}" Foreground="{StaticResource TextForeground}">
     <Grid Name="_mainGrid">
         <Grid.RowDefinitions>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -7,11 +8,19 @@ using System.Windows.Input;
 using TokeiLibrary;
 
 namespace ActEditor.Core.WPF.EditorControls {
-	public static class ScrollBarHelper {
-		public static void OverrideMouseIncrement(ScrollBar bar, Action increment, Action decrement) {
+	public class ScrollBarHelper {
+		private ScrollBar _bar;
+		private MouseButtonEventHandler _handler;
+
+		public void OverrideMouseIncrement(ScrollBar bar, Action increment, Action decrement) {
 			long lastClicked = DateTime.Now.Ticks;
 
-			bar.PreviewMouseLeftButtonDown += delegate(object sender, MouseButtonEventArgs e) {
+			if (_bar != null) {
+				_bar.PreviewMouseLeftButtonDown -= _handler;
+			}
+
+			_bar = bar;
+			_handler = delegate(object sender, MouseButtonEventArgs e) {
 				if (bar.Track.IsMouseOver) {
 					return;
 				}
@@ -28,6 +37,7 @@ namespace ActEditor.Core.WPF.EditorControls {
 
 				Task.Run(() => {
 					bool firstClick = true;
+
 					while (bar.Dispatch(() => Mouse.LeftButton) == MouseButtonState.Pressed) {
 						bar.Dispatch(delegate {
 							mousePosition = e.GetPosition(bar);
@@ -43,8 +53,9 @@ namespace ActEditor.Core.WPF.EditorControls {
 
 						var beforeSleep = DateTime.Now.Ticks;
 
+						//Task.Delay(firstClick ? 400 : 50);
 						Thread.Sleep(firstClick ? 400 : 50);
-						
+
 						if (lastClicked > beforeSleep) {
 							break;
 						}
@@ -55,6 +66,8 @@ namespace ActEditor.Core.WPF.EditorControls {
 
 				e.Handled = true;
 			};
+
+			bar.PreviewMouseLeftButtonDown += _handler;
 		}
 	}
 }

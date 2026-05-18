@@ -17,15 +17,13 @@ namespace ActEditor.Core.DrawingComponents {
 		}
 
 		private LineRenderer _renderer = new LineRenderer();
-		private IFrameRendererEditor _editor;
 
-		public LineDraw(IFrameRendererEditor editor) {
+		public LineDraw(FrameRenderer frameRenderer) {
 			ActEditorConfiguration.ActEditorGridLineHorizontal.PropertyChanged += _onPropertyChanged;
 			ActEditorConfiguration.ActEditorGridLineVertical.PropertyChanged += _onPropertyChanged;
 			_onPropertyChanged();
 
-			_editor = editor;
-			_renderer.SetAct(this, editor, editor.FrameRenderer);
+			_renderer.SetAct(this, frameRenderer);
 		}
 
 		public override void QuickRender(FrameRenderer renderer) {
@@ -62,7 +60,6 @@ namespace ActEditor.Core.DrawingComponents {
 
 	public class LineRenderer : FrameworkElement {
 		private LineDraw _lineDraw;
-		private IFrameRendererEditor _editor;
 		private FrameRenderer _frameRenderer;
 		private VisualCollection _visuals;
 
@@ -71,9 +68,8 @@ namespace ActEditor.Core.DrawingComponents {
 
 		private DrawingVisual _gridVisual = new DrawingVisual();
 
-		public void SetAct(LineDraw lineDraw, IFrameRendererEditor editor, FrameRenderer frameRenderer) {
+		public void SetAct(LineDraw lineDraw, FrameRenderer frameRenderer) {
 			_lineDraw = lineDraw;
-			_editor = editor;
 			_frameRenderer = frameRenderer;
 			_visuals = new VisualCollection(frameRenderer.Canvas);
 		}

@@ -60,9 +60,6 @@ namespace ActEditor.Core.WPF.Dialogs {
 		public ScriptRunnerDialog() : base("Script Runner", "dos.png", SizeToContent.WidthAndHeight, ResizeMode.CanResize) {
 			InitializeComponent();
 
-			ShowInTaskbar = true;
-			WindowStartupLocation = WindowStartupLocation.CenterOwner;
-
 			AvalonLoader.Load(_textEditor);
 			AvalonLoader.SetSyntax(_textEditor, "C#");
 			SizeToContent = SizeToContent.WidthAndHeight;
@@ -88,7 +85,7 @@ namespace ActEditor.Core.WPF.Dialogs {
 
 			_textEditor.Text = ActEditorConfiguration.ActEditorScriptRunnerScript;
 			_textEditor.TextChanged += delegate { ActEditorConfiguration.ActEditorScriptRunnerScript = _textEditor.Text; };
-			_textEditor.PreviewKeyDown += new KeyEventHandler(_textEditor_PreviewKeyDown);
+			_textEditor.PreviewKeyDown += _textEditor_PreviewKeyDown;
 
 			_rcm = new WpfRecentFiles(ActEditorConfiguration.ConfigAsker, 6, _miLoadRecent, "Act Editor - ScriptRunner recent files");
 			_rcm.FileClicked += new RecentFilesManager.RFMFileClickedEventHandler(_rcm_FileClicked);

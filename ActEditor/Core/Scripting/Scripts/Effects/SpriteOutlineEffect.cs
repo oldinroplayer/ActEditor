@@ -1,7 +1,9 @@
 ﻿using GRF.FileFormats.ActFormat;
 using GRF.FileFormats.SprFormat;
 using GRF.Image;
+using System;
 using System.Linq;
+using Utilities;
 
 namespace ActEditor.Core.Scripting.Scripts.Effects {
 	public class SpriteOutlineEffect : ImageProcessingEffect {
@@ -10,6 +12,7 @@ namespace ActEditor.Core.Scripting.Scripts.Effects {
 		public class EffectOptions {
 			public GrfColor Color;
 			public int Thickness;
+			public int Offset;
 		}
 
 		private EffectOptions _options = new EffectOptions();
@@ -21,7 +24,8 @@ namespace ActEditor.Core.Scripting.Scripts.Effects {
 		public override void OnAddProperties(EffectConfiguration effect) {
 			base.OnAddProperties(effect);
 			effect.AddProperty("Color", new GrfColor(255, 255, 255, 255), default, default);
-			effect.AddProperty("Thickness", 1, 1, 5);
+			effect.AddProperty("Thickness", 1, 1, 10);
+			effect.AddProperty("Offset", 0, 0, 10);
 			_animationComponent.SetEditType(AnimationEditTypes.TargetOnly);
 			_animationComponent.DefaultSaveData.AllAnimations = true;
 			_animationComponent.DefaultSaveData.AllLayers = true;
@@ -34,6 +38,7 @@ namespace ActEditor.Core.Scripting.Scripts.Effects {
 			base.OnPreviewApplyEffect(effect);
 			_options.Color = effect.GetProperty<GrfColor>("Color");
 			_options.Thickness = effect.GetProperty<int>("Thickness");
+			_options.Offset = effect.GetProperty<int>("Offset");
 
 			_generateBgra32Images = false;
 			_paletteInsertIndex = -1;
@@ -89,26 +94,61 @@ namespace ActEditor.Core.Scripting.Scripts.Effects {
 			if (_options.Thickness < 0)
 				return;
 
-			for (int i = 0; i < _options.Thickness; i++) {
-				img.Crop(-1);
-				var imgCopy = img.Copy();
+			_options.Offset = Methods.Clamp(_options.Offset, 0, 1000);
 
+			int totalLayers = _options.Offset + _options.Thickness;
+			img.Crop(-totalLayers);
+
+			int[,] distance = new int[img.Width, img.Height];
+			const int Inf = 10000;
+
+			// Pass 1: Initialize table
+			// Sprite pixels = 0 (the source). Transparent pixels = Inf.
+			for (int y = 0; y < img.Height; y++) {
 				for (int x = 0; x < img.Width; x++) {
-					for (int y = 0; y < img.Height; y++) {
-						if (imgCopy.IsPixelTransparent(x, y)) {
-							if (
-								(x == 0 || imgCopy.IsPixelTransparent(x - 1, y)) &&
-								(x == img.Width - 1 || imgCopy.IsPixelTransparent(x + 1, y)) &&
-								(y == 0 || imgCopy.IsPixelTransparent(x, y - 1)) &&
-								(y == img.Height - 1 || imgCopy.IsPixelTransparent(x, y + 1))) {
-								continue;
-							}
+					if (img.IsPixelTransparent(x, y)) {
+						distance[x, y] = Inf;
+					}
+				}
+			}
 
-							if (img.GrfImageType == GrfImageType.Indexed8)
-								img.Pixels[y * img.Width + x] = (byte)_paletteInsertIndex;
-							else
-								img.SetColor(x, y, _options.Color);
-						}
+			// Pass 2: Find distance from top-left to bottom-right
+			for (int y = 0; y < img.Height; y++) {
+				for (int x = 0; x < img.Width; x++) {
+					if (distance[x, y] == 0) continue;
+
+					int left = x > 0 ? distance[x - 1, y] + 1 : Inf;
+					int top = y > 0 ? distance[x, y - 1] + 1 : Inf;
+
+					distance[x, y] = Math.Min(distance[x, y], Math.Min(left, top));
+				}
+			}
+
+			// Pass 3: Find distance from bottom-right to top-left
+			for (int y = img.Height - 1; y >= 0; y--) {
+				for (int x = img.Width - 1; x >= 0; x--) {
+					if (distance[x, y] == 0) continue;
+
+					int right = x < img.Width - 1 ? distance[x + 1, y] + 1 : Inf;
+					int bottom = y < img.Height - 1 ? distance[x, y + 1] + 1 : Inf;
+
+					distance[x, y] = Math.Min(distance[x, y], Math.Min(right, bottom));
+				}
+			}
+
+			// Pass 4: Apply the outline using the distance table "mask" to the image, using the offset and thickness
+			int minDistance = _options.Offset + 1;
+			int maxDistance = _options.Offset + _options.Thickness;
+
+			for (int x = 0; x < img.Width; x++) {
+				for (int y = 0; y < img.Height; y++) {
+					int d = distance[x, y];
+
+					if (d >= minDistance && d <= maxDistance) {
+						if (img.GrfImageType == GrfImageType.Indexed8)
+							img.Pixels[y * img.Width + x] = (byte)_paletteInsertIndex;
+						else
+							img.SetColor(x, y, _options.Color);
 					}
 				}
 			}
@@ -116,7 +156,7 @@ namespace ActEditor.Core.Scripting.Scripts.Effects {
 
 		public override string Group => "Effects/Global";
 		public override string InputGesture => "{Dialog.SpriteOutline}";
-		public override string Image => "empty.png";
+		public override string Image => "effect_outline.png";
 
 		#endregion
 	}

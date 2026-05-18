@@ -34,6 +34,7 @@ namespace ActEditor {
 			Configuration.ProgramDataPath = GrfPath.Combine(Configuration.ApplicationDataPath, ActEditorConfiguration.ProgramName);
 			EffectConfiguration.ConfigAsker = ActEditorConfiguration.ConfigAsker;
 			EncodingService.SetDisplayEncoding(ActEditorConfiguration.EncodingCodepage);
+			
 			EffectConfiguration.DisplayAction = (effectConfig, act, actionIndex) => {
 				EffectPreviewDialog effectDialog = new EffectPreviewDialog(act, actionIndex, effectConfig);
 				EffectConfiguration.Displayed = true;
@@ -47,89 +48,83 @@ namespace ActEditor {
 		}
 
 		protected override void OnStartup(StartupEventArgs e) {
-			ApplicationManager.ThemeChanged += delegate {
-				try {
-					AppContext.SetSwitch("Switch.System.Windows.Controls.Text.UseAdornerForTextboxSelectionRendering", ActEditorConfiguration.ThemeIndex == 0);
-				}
-				catch {
-				}
-			};
-
 			ApplicationManager.CrashReportEnabled = true;
 			ImageConverterManager.AddConverter(new DefaultImageConverter());
 
+			ApplicationManager.ThemeChanged += delegate {
+				Debug.Ignore(() => AppContext.SetSwitch("Switch.System.Windows.Controls.Text.UseAdornerForTextboxSelectionRendering", ActEditorConfiguration.ThemeIndex == 0));
+			};
+
 			Configuration.SetImageRendering(Resources);
 
-			Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri("pack://application:,,,/" + Assembly.GetEntryAssembly().GetName().Name.Replace(" ", "%20") + ";component/WPF/Styles/GRFEditorStyles.xaml", UriKind.RelativeOrAbsolute) });
-
 			if (ActEditorConfiguration.StyleTheme == "") {
-				ActEditorConfiguration.ThemeIndex = 0;
+				_setDefaultTheme();
 			}
 			else {
-				Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri("pack://application:,,,/" + Assembly.GetEntryAssembly().GetName().Name.Replace(" ", "%20") + ";component/WPF/Styles/StyleDark.xaml", UriKind.RelativeOrAbsolute) });
-
-				ApplicationManager.ImageProcessing = delegate(string name, BitmapFrame img) {
-					if (img == null) return null;
-
-					var pName = Path.GetFileName(name).ToLowerInvariant();
-					Func<byte, byte, byte, byte, Color> shader;
-
-					switch (pName) {
-						case "reset.png":
-							shader = delegate(byte A, byte R, byte G, byte B) {
-								return Color.FromArgb(A, Methods.ClampToColorByte((R) * 1.8), Methods.ClampToColorByte(G / 3), Methods.ClampToColorByte(B / 3));
-							};
-
-							return _applyShader(img, shader);
-						case "eye.png":
-						case "smallArrow.png":
-						case "cs_pen.png":
-						case "cs_eraser.png":
-						case "cs_line.png":
-						case "cs_circle.png":
-						case "cs_eraser2.png":
-						case "cs_selection.png":
-						case "cs_bucket.png":
-						case "effect_radial_erosion.png":
-						case "effect_spike_erosion.png":
-							shader = delegate(byte A, byte R, byte G, byte B) {
-								return Color.FromArgb(A, Methods.ClampToColorByte((255 - R) * 0.8), Methods.ClampToColorByte((255 - G) * 0.8), Methods.ClampToColorByte((255 - B) * 0.8));
-							};
-
-							return _applyShader(img, shader);
-						case "arrow.png":
-						case "arrowoblique.png":
-							shader = delegate (byte A, byte R, byte G, byte B) {
-								return Color.FromArgb(A, Methods.ClampToColorByte((255 - R) * 0.8), Methods.ClampToColorByte((255 - G) * 0.6), 0);
-							};
-
-							return _applyShader(img, shader);
-					}
-
-					return img;
-				};
-
-				ActEditorConfiguration.ThemeIndex = 1;
-
-				try {
-					AppContext.SetSwitch("Switch.System.Windows.Controls.Text.UseAdornerForTextboxSelectionRendering", false);
-				}
-				catch {
-				}
-
-				if (ActEditorConfiguration.StyleTheme != "Dark theme") {
-					var path = GrfPath.Combine(ActEditorConfiguration.ProgramDataPath, "Themes", ActEditorConfiguration.StyleTheme + ".xaml");
-
-					try {
-						Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri(path, UriKind.RelativeOrAbsolute) });
-					}
-					catch (Exception err) {
-						ActEditorConfiguration.StyleTheme = "Dark theme";
-						ErrorHandler.HandleException(err);
-					}
-				}
+				_setDarkTheme();
 			}
 
+			_checkWindowsXPStyle();
+
+			base.OnStartup(e);
+		}
+
+		private void _setDefaultTheme() {
+			ActEditorConfiguration.ThemeIndex = 0;
+			Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri("pack://application:,,,/" + Assembly.GetEntryAssembly().GetName().Name.Replace(" ", "%20") + ";component/WPF/Styles/GRFEditorStyles.xaml", UriKind.RelativeOrAbsolute) });
+		}
+
+		private void _setDarkTheme() {
+			ActEditorConfiguration.ThemeIndex = 1;
+			Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri("pack://application:,,,/" + Assembly.GetEntryAssembly().GetName().Name.Replace(" ", "%20") + ";component/WPF/Styles/GRFEditorStyles.xaml", UriKind.RelativeOrAbsolute) });
+			Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri("pack://application:,,,/" + Assembly.GetEntryAssembly().GetName().Name.Replace(" ", "%20") + ";component/WPF/Styles/StyleDark.xaml", UriKind.RelativeOrAbsolute) });
+
+			ApplicationManager.ImageProcessing = _darkThemeImageProcessing;
+			Debug.Ignore(() => AppContext.SetSwitch("Switch.System.Windows.Controls.Text.UseAdornerForTextboxSelectionRendering", false));
+		}
+
+		private BitmapSource _darkThemeImageProcessing(string name, BitmapFrame img) {
+			if (img == null) return null;
+
+			var pName = Path.GetFileName(name).ToLowerInvariant();
+			Func<byte, byte, byte, byte, Color> shader;
+
+			switch (pName) {
+				case "reset.png":
+					shader = delegate (byte A, byte R, byte G, byte B) {
+						return Color.FromArgb(A, Methods.ClampToColorByte((R) * 1.8), Methods.ClampToColorByte(G / 3), Methods.ClampToColorByte(B / 3));
+					};
+
+					return _applyShader(img, shader);
+				case "eye.png":
+				case "smallArrow.png":
+				case "cs_pen.png":
+				case "cs_eraser.png":
+				case "cs_line.png":
+				case "cs_circle.png":
+				case "cs_eraser2.png":
+				case "cs_selection.png":
+				case "cs_bucket.png":
+				case "effect_radial_erosion.png":
+				case "effect_spike_erosion.png":
+					shader = delegate (byte A, byte R, byte G, byte B) {
+						return Color.FromArgb(A, Methods.ClampToColorByte((255 - R) * 0.8), Methods.ClampToColorByte((255 - G) * 0.8), Methods.ClampToColorByte((255 - B) * 0.8));
+					};
+
+					return _applyShader(img, shader);
+				case "arrow.png":
+				case "arrowoblique.png":
+					shader = delegate (byte A, byte R, byte G, byte B) {
+						return Color.FromArgb(A, Methods.ClampToColorByte((255 - R) * 0.8), Methods.ClampToColorByte((255 - G) * 0.6), 0);
+					};
+
+					return _applyShader(img, shader);
+			}
+
+			return img;
+		}
+
+		private void _checkWindowsXPStyle() {
 			if (!Methods.IsWinVistaOrHigher() && Methods.IsWinXPOrHigher()) {
 				// We are on Windows XP, force the style.
 				try {
@@ -140,8 +135,6 @@ namespace ActEditor {
 					MessageBox.Show("Failed to apply a style override for Windows XP's theme.");
 				}
 			}
-
-			base.OnStartup(e);
 		}
 
 		private void _darkTheme(byte[] pixels, PixelFormat format, List<Color> colors, Func<byte, byte, byte, byte, Color> shader) {

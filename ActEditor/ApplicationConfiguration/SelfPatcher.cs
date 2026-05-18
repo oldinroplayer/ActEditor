@@ -26,6 +26,7 @@ namespace ActEditor.ApplicationConfiguration {
 			PatchIds.Add(138);
 			PatchIds.Add(140);
 			PatchIds.Add(141);
+			PatchIds.Add(142);
 		}
 
 		public static void SelfPatch() {
@@ -143,6 +144,10 @@ namespace ActEditor.ApplicationConfiguration {
 						break;
 					case 141:
 						ActEditorConfiguration.ActEditorGarmentPaths = "";
+						break;
+					case 142:
+						GrfPath.Delete(Path.Combine(path, "script6_merge_layers.cs"));
+						GrfPath.Delete(Path.Combine(path, "script4_generate_single_sprite.cs"));
 						break;
 				}
 			}

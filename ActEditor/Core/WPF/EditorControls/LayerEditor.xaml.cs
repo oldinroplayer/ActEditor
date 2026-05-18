@@ -12,6 +12,7 @@ using ActEditor.ApplicationConfiguration;
 using ActEditor.Core.DrawingComponents;
 using ActEditor.Core.Scripting.Scripts;
 using ActEditor.Core.WPF.Dialogs;
+using ActEditor.Core.WPF.EditorControls.ActSelectorComponents;
 using ActEditor.Core.WPF.GenericControls;
 using ErrorManager;
 using GRF.FileFormats.ActFormat;
@@ -132,9 +133,13 @@ namespace ActEditor.Core.WPF.EditorControls {
 				if (actEditor.Act == null) return;
 				actEditor.Act.Commands.CommandRedo += (s, e) => _visualEditor.InvalidateVisual();
 				actEditor.Act.Commands.CommandUndo += (s, e) => _visualEditor.InvalidateVisual();
+				actEditor.Act.VisualInvalidated += delegate {
+					Console.WriteLine(DateTime.Now.ToFileTimeUtc() + " Visual invalidated called...");
+					_visualEditor.InvalidateVisual();
+				};
 			};
 
-			_actEditor._frameSelector.AnimationPlaying += new ActIndexSelector.FrameIndexChangedDelegate(_frameSelector_AnimationPlaying);
+			_actEditor._frameSelector.AnimationPlaying += new ActIndexSelector.AnimationStateEventHandler(_frameSelector_AnimationPlaying);
 
 			PreviewMouseDown += new MouseButtonEventHandler(_layerEditor_MouseDown);
 			PreviewMouseUp += new MouseButtonEventHandler(_layerEditor_MouseUp);
@@ -166,8 +171,8 @@ namespace ActEditor.Core.WPF.EditorControls {
 			_layerControlThread.Update(layerIndexes);
 		}
 
-		private void _frameSelector_AnimationPlaying(object sender, int mode) {
-			if (mode == 0) {
+		private void _frameSelector_AnimationPlaying(AnimationState state) {
+			if (state == AnimationState.Stopped) {
 				_watch.Stop();
 
 				SetReadonlyMode(false, fromAnimationPlaying: true);
@@ -183,7 +188,7 @@ namespace ActEditor.Core.WPF.EditorControls {
 			}
 
 			this.Dispatch(delegate {
-				IsHitTestVisible = mode == 0;
+				IsHitTestVisible = state == AnimationState.Stopped;
 			});
 		}
 

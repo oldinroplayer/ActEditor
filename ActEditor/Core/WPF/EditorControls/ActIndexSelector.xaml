@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:Styles="clr-namespace:TokeiLibrary.WPF.Styles;assembly=TokeiLibrary"
-             xmlns:GenericControls="clr-namespace:ActEditor.Core.WPF.GenericControls" mc:Ignorable="d" >
+             xmlns:GenericControls="clr-namespace:ActEditor.Core.WPF.GenericControls" xmlns:actselectorcomponents="clr-namespace:ActEditor.Core.WPF.EditorControls.ActSelectorComponents" mc:Ignorable="d" >
     <StackPanel>
         <Grid>
             <Grid.ColumnDefinitions>
@@ -27,27 +27,8 @@
                             <RowDefinition Height="auto" />
                             <RowDefinition />
                         </Grid.RowDefinitions>
-                        <Grid Height="auto" VerticalAlignment="Bottom">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition />
-                                <ColumnDefinition />
-                                <ColumnDefinition />
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition />
-                                <RowDefinition />
-                                <RowDefinition />
-                            </Grid.RowDefinitions>
-                            <Styles:FancyButton x:Name="_fancyButton3" Click="_fancyButton_Click" Height="20" Width="20" Grid.Row="0" Grid.Column="0" />
-                            <Styles:FancyButton x:Name="_fancyButton4" Click="_fancyButton_Click" Height="20" Width="20" Grid.Row="0" Grid.Column="1" />
-                            <Styles:FancyButton x:Name="_fancyButton5" Click="_fancyButton_Click" Height="20" Width="20" Grid.Row="0" Grid.Column="2" />
-                            <Styles:FancyButton x:Name="_fancyButton2" Click="_fancyButton_Click" Height="20" Width="20" Grid.Row="1" Grid.Column="0" />
-                            <Styles:FancyButton x:Name="_fancyButton6" Click="_fancyButton_Click" Height="20" Width="20" Grid.Row="1" Grid.Column="2" />
-                            <Styles:FancyButton x:Name="_fancyButton1" Click="_fancyButton_Click" Height="20" Width="20" Grid.Row="2" Grid.Column="0" />
-                            <Styles:FancyButton x:Name="_fancyButton0" Click="_fancyButton_Click" Height="20" Width="20" Grid.Row="2" Grid.Column="1" />
-                            <Styles:FancyButton x:Name="_fancyButton7" Click="_fancyButton_Click" Height="20" Width="20" Grid.Row="2" Grid.Column="2" />
-                        </Grid>
-                        <Grid Grid.Column="1">
+						<actselectorcomponents:ActionDirectionalControl x:Name="_directionalControl" VerticalAlignment="Bottom" ButtonSize="20" />
+						<Grid Grid.Column="1">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="auto" />
                                 <RowDefinition />
@@ -61,7 +42,7 @@
                                     </TextBlock>
                                 </TextBlock.ToolTip>
                             </TextBlock>
-                            <ComboBox Grid.Row="1" Name="_comboBoxAnimationIndex" Height="22" Width="100" HorizontalAlignment="Left" Margin="3" SelectionChanged="_comboBoxAnimationIndex_SelectionChanged" />
+                            <ComboBox Grid.Row="1" Name="_comboBoxAnimationIndex" Height="22" Width="100" HorizontalAlignment="Left" Margin="3" />
                         </Grid>
                         <Grid Grid.Column="2" HorizontalAlignment="Left">
                             <Grid.RowDefinitions>
@@ -69,25 +50,11 @@
                                 <RowDefinition />
                             </Grid.RowDefinitions>
                             <TextBlock Text="Action index&#10;" Margin="3" TextAlignment="Center" TextWrapping="Wrap" Width="100" />
-                            <ComboBox Grid.Row="1" Name="_comboBoxActionIndex" Height="22" Width="100" HorizontalAlignment="Left" Margin="3" SelectionChanged="_comboBoxActionIndex_SelectionChanged" />
+                            <ComboBox Grid.Row="1" Name="_comboBoxActionIndex" Height="22" Width="100" HorizontalAlignment="Left" Margin="3" />
                         </Grid>
-
-                        <ScrollBar Grid.ColumnSpan="2" Maximum="0" Grid.Row="1" Name="_sbFrameIndex" HorizontalAlignment="Left" Width="166" Orientation="Horizontal" Margin="0 3 0 3" />
-                        <Grid Grid.Row="1" Grid.Column="2">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition />
-                                <ColumnDefinition Width="auto" />
-                            </Grid.ColumnDefinitions>
-                            <Border Margin="3 0 0 0" BorderBrush="Transparent" Name="_borderFrameIndex" BorderThickness="1" VerticalAlignment="Center" CornerRadius="1" >
-                                <GenericControls:ClickSelectTextBox x:Name="_tbFrameIndex" BorderThickness="0" Text="0" TextAlignment="Right" VerticalAlignment="Center" />
-                            </Border>
-                            <TextBox ToolTipService.ShowDuration="1000000" Background="Transparent" Grid.Column="1" BorderThickness="0" IsHitTestVisible="False" Name="_labelFrameIndex" Text="/ 0 frames" Padding="0" VerticalAlignment="Center">
-                                <TextBox.ToolTip>
-                                    The index of the frame in the selected action. This index is 0 based.
-                                </TextBox.ToolTip>
-                            </TextBox>
-                        </Grid>
-                    </Grid>
+						<actselectorcomponents:FrameScrollBar x:Name="_sbFrameIndex" Grid.ColumnSpan="2" Grid.Row="1" HorizontalAlignment="Left" Width="166" Margin="0 3 0 3" />
+						<actselectorcomponents:FrameTextBoxSelector Grid.Row="1" Grid.Column="2" x:Name="_frameTbSelect" />
+					</Grid>
                 </Grid>
             </Border>
 
@@ -136,8 +103,8 @@
                         Render mode is currently set to "Editor".
                     </Styles:FancyButton.ToolTip>
                 </Styles:FancyButton>
-                <ComboBox VerticalAlignment="Center" Name="_cbSound" Grid.Row="2" Grid.Column="3" Margin="3" Width="100" />
-                <Styles:FancyButton VerticalAlignment="Center" Grid.Row="1" Grid.Column="1" x:Name="_play" Height="20" Margin="2" />
+				<actselectorcomponents:SoundSelector x:Name="_cbSound" VerticalAlignment="Center" Grid.Row="2" Grid.Column="3" Margin="3" Width="100" />
+				<Styles:FancyButton VerticalAlignment="Center" Grid.Row="1" Grid.Column="1" x:Name="_play" Height="20" Margin="2" Click="_play_Click" />
                 <Grid Grid.Row="1" Grid.Column="0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="auto" />

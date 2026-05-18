@@ -75,7 +75,7 @@ namespace ActEditor.Core.Scripting.Scripts.Effects {
 		public override void ProcessAction(Act act, Action action, int animStart, int animLength) {
 			animLength = animLength <= 0 ? action.Frames.Count : animLength;
 
-			int aid = act.Actions.IndexOf(action);
+			int aid = _status.Aid;
 
 			_layer2Stripes = new List<List<Stripe>>();
 			_layer2Offsets = new List<int>();
@@ -111,7 +111,7 @@ namespace ActEditor.Core.Scripting.Scripts.Effects {
 						var tLayer = layer.Clone();
 						tLayer.ScaleX = 1;
 						tLayer.ScaleY = 1;
-						var box = ActImaging.Imaging.GenerateFrameBoundingBox(act, tLayer);
+						var box = ActImaging.Imaging.GenerateBoundingBox(act, tLayer);
 						
 						_layer2BoundingBox[new ActIndex { ActionIndex = aid, FrameIndex = j, LayerIndex = i }] = box;
 

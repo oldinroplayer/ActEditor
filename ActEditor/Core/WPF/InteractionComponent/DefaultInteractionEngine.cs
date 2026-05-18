@@ -56,7 +56,6 @@ namespace ActEditor.Core.WPF.InteractionComponent {
 					foreach (var layer in layerClipboardData.Layers) {
 						var image = layer.GetImage(spr);
 
-
 						if (image != null) {
 							image = image.Copy();
 

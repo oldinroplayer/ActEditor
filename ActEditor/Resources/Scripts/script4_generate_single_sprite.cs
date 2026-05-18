@@ -10,6 +10,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using ErrorManager;
 using GRF.FileFormats.ActFormat;
+using GRF.FileFormats.SprFormat;
 using GRF.Image;
 using GRF.Image.Decoders;
 using GrfToWpfBridge;
@@ -20,27 +21,45 @@ using Frame = GRF.FileFormats.ActFormat.Frame;
 
 namespace Scripts {
 	public class Script : IActScript {
+		private GrfImage _guide;
+
 		public object DisplayName {
 			get { return "Generate sprite from selection"; }
 		}
-		
+
 		public string Group {
 			get { return "Scripts"; }
 		}
-		
+
 		public string InputGesture {
 			get { return "Ctrl-Shift-K"; }
 		}
-		
+
 		public string Image {
 			get { return "arrowdown.png"; }
 		}
-		
+
+		public Script() {
+			byte[] palette = new byte[1024];
+			var pixels = new byte[3 * 6] {
+				0, 0, 0, 0, 0, 0,
+				0, 1, 2, 3, 4, 0,
+				0, 0, 0, 0, 0, 0
+			};
+			GrfImage imageGuide = new GrfImage(pixels, 6, 3, GrfImageType.Indexed8, palette);
+			imageGuide.SetPaletteColor(1, new GrfColor(255, 67, 59, 249));
+			imageGuide.SetPaletteColor(2, new GrfColor(255, 33, 114, 46));
+			imageGuide.SetPaletteColor(3, new GrfColor(255, 229, 88, 97));
+			imageGuide.SetPaletteColor(4, new GrfColor(255, 12, 213, 109));
+
+			_guide = imageGuide;
+		}
+
 		public void Execute(Act act, int selectedActionIndex, int selectedFrameIndex, int[] selectedLayerIndexes) {
 			if (act == null) return;
 
 			var frame = act[selectedActionIndex, selectedFrameIndex];
-			
+
 			if (selectedLayerIndexes.Length == 0) {
 				selectedLayerIndexes = new int[frame.NumberOfLayers];
 
@@ -52,59 +71,48 @@ namespace Scripts {
 			if (selectedLayerIndexes.Length == 0) {
 				ErrorHandler.HandleException("No layers found.", ErrorLevel.Warning);
 			}
-			
-			int absoluteIndex = -1;
 
 			List<Layer> layers = act[selectedActionIndex, selectedFrameIndex].Layers;
 			List<Layer> selected = selectedLayerIndexes.Select(index => layers[index]).ToList();
-			
+
 			try {
 				act.Commands.ActEditBegin("Generate single sprite");
 
-				Act action = new Act(act.Sprite);
-				action.AddAction();
-				action.Commands.FrameInsertAt(0, 0);
-				action.Commands.LayerAdd(0, 0, selected.ToArray());
+				Action action = new Action();
+				Frame frameSelection = new Frame();
+				action.Frames.Add(frameSelection);
+				frameSelection.Layers.AddRange(selected);
 
-				BitmapFrame bitFrame;
+				var box = ActImaging.Imaging.GenerateBoundingBox(act, selected, ceilingAwayFromZero: false);
+				var imageGuide = frameSelection.Render(act, _guide);
+				var image = frameSelection.Render(act);
 
-				ImageSource image = ActImaging.Imaging.GenerateFrameImage(action, action[0, 0]);
-				bitFrame = ActImaging.Imaging.ForceRender(image, BitmapScalingMode.NearestNeighbor);
+				if (selected.All(p => p.IsIndexed8())) {
+					image.Convert(new Indexed8FormatConverter { ExistingPalette = act.Sprite.Palette.BytePalette, Options = Indexed8FormatConverter.PaletteOptions.UseExistingPalette }, null);
+				}
 
-				PngBitmapEncoder encoder = new PngBitmapEncoder();
-				encoder.Frames.Add(bitFrame);
+				SpriteIndex sprIndex = SpriteIndex.Null;
 
-				GrfImage grfImage;
-
-				using (MemoryStream stream = new MemoryStream()) {
-					encoder.Save(stream);
-
-					stream.Seek(0, SeekOrigin.Begin);
-					byte[] imData = new byte[stream.Length];
-					stream.Read(imData, 0, imData.Length); 
-
-					grfImage = new GrfImage(imData);
-
-					if (selected.All(p => p.IsIndexed8())) {
-						grfImage.Convert(new Indexed8FormatConverter {ExistingPalette = act.Sprite.Palette.BytePalette, Options = Indexed8FormatConverter.PaletteOptions.UseExistingPalette}, null);
-					}
-					else {
-						grfImage.Convert(new Bgra32FormatConverter(), null);
+				for (int i = 0; i < act.Sprite.Images.Count; i++) {
+					if (image.Equals(act.Sprite.Images[i])) {
+						sprIndex = SpriteIndex.FromAbsoluteIndex(i, act.Sprite, act.Sprite.Images[i]);
 					}
 				}
 
-				absoluteIndex = grfImage.GrfImageType == GrfImageType.Indexed8 ? act.Sprite.NumberOfIndexed8Images : act.Sprite.NumberOfImagesLoaded;
-				var sprIndex = act.Sprite.InsertAny(grfImage);
-				
-				GRF.Graphics.BoundingBox box = ActImaging.Imaging.GenerateFrameBoundingBox(action, frame);
-				
-				int offsetX = (int) ((int) ((box.Max.X - box.Min.X + 1) / 2) + box.Min.X);
-				int offsetY = (int) ((int) ((box.Max.Y - box.Min.Y + 1) / 2) + box.Min.Y);
+				if (!sprIndex.Valid) {
+					sprIndex = act.Sprite.InsertAny(image);
+				}
+
+				int offsetX = (int)Math.Round(box.Center.X + 0.5f);
+				int offsetY = (int)Math.Round(box.Center.Y + 0.5f);
+
+				_adjustOffsetFromMarker(box, imageGuide, ref offsetX, ref offsetY);
+
 				var layer = new Layer(sprIndex);
-				
+
 				layer.OffsetX = offsetX;
-				layer.OffsetY= offsetY;
-				
+				layer.OffsetY = offsetY;
+
 				frame.Layers.Add(layer);
 			}
 			catch (Exception err) {
@@ -116,9 +124,49 @@ namespace Scripts {
 				act.Commands.ActEditEnd();
 			}
 		}
-		
+
 		public bool CanExecute(Act act, int selectedActionIndex, int selectedFrameIndex, int[] selectedLayerIndexes) {
 			return act != null;
+		}
+
+		private void _adjustOffsetFromMarker(GRF.Graphics.BoundingBox box, GrfImage imageGuide, ref int offsetX, ref int offsetY) {
+			int markerCenterX = (int)box.Center.X + (imageGuide.Width % 2);
+			int markerCenterY = (int)box.Center.Y + (imageGuide.Height % 2);
+
+			for (int y = -1; y <= 1; y++) {
+				for (int x = -3; x <= -1; x++) {
+					int markerX = imageGuide.Width / 2 + x;
+					int markerY = imageGuide.Height / 2 + y;
+
+					bool found = true;
+
+					for (int k = 0; k < 4; k++) {
+						if (imageGuide.GetColor(markerX + k, markerY) != _guide.GetColor(7 + k)) {
+							found = false;
+							break;
+						}
+					}
+
+					if (found) {
+						int computedMarkerX = markerX - imageGuide.Width / 2;
+						int computedMarkerY = markerY - imageGuide.Height / 2;
+
+						// Marker center diff:
+						computedMarkerX += offsetX - markerCenterX;
+						computedMarkerY += offsetY - markerCenterY;
+
+						if (computedMarkerX < -2)
+							offsetX++;
+						if (computedMarkerX > -2)
+							offsetX--;
+						if (computedMarkerY < -1)
+							offsetY++;
+						if (computedMarkerY > -1)
+							offsetY--;
+						break;
+					}
+				}
+			}
 		}
 	}
 }
